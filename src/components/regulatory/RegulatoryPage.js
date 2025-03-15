@@ -1,7 +1,9 @@
 // src/components/regulatory/RegulatoryPage.js
 import React, { useState } from 'react';
-import { Container, Form, Button, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Alert } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSearch, faFileAlt, faFileShield, faInfoCircle, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
 
 const RegulatoryPage = () => {
   const { t } = useTranslation();
@@ -9,6 +11,274 @@ const RegulatoryPage = () => {
   const [searchResult, setSearchResult] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState(false);
+  const [buttonHovered, setButtonHovered] = useState(false);
+  
+  // Stili inline
+  const styles = {
+    section: {
+      padding: '90px 0 70px',
+      backgroundColor: '#f8f9fa',
+      minHeight: '85vh',
+      position: 'relative'
+    },
+    pageHeader: {
+      textAlign: 'center',
+      marginBottom: '50px',
+      position: 'relative',
+      padding: '0 20px'
+    },
+    pageTitle: {
+      fontSize: '40px',
+      fontWeight: '700',
+      color: '#2c3e50',
+      marginBottom: '20px',
+      fontFamily: "'Poppins', sans-serif",
+      position: 'relative',
+      paddingBottom: '15px'
+    },
+    titleDecoration: {
+      content: '""',
+      position: 'absolute',
+      bottom: '0',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      width: '80px',
+      height: '3px',
+      background: 'linear-gradient(90deg, #c89b7b, #e2b77e)',
+      borderRadius: '1.5px'
+    },
+    pageSubtitle: {
+      fontSize: '18px',
+      color: '#596275',
+      maxWidth: '800px',
+      margin: '0 auto 20px',
+      lineHeight: '1.8'
+    },
+    searchContainer: {
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
+      padding: '40px',
+      maxWidth: '800px',
+      margin: '0 auto 60px',
+      position: 'relative',
+      overflow: 'hidden',
+      border: '1px solid rgba(0, 0, 0, 0.05)'
+    },
+    searchForm: {
+      display: 'flex',
+      position: 'relative',
+      maxWidth: '600px',
+      margin: '30px auto 0'
+    },
+    searchInput: {
+      flex: '1',
+      padding: '16px 20px',
+      fontSize: '16px',
+      border: '2px solid rgba(0, 0, 0, 0.1)',
+      borderRadius: '8px',
+      outline: 'none',
+      transition: 'all 0.3s ease',
+      backgroundColor: '#f8f9fa'
+    },
+    searchInputFocused: {
+      borderColor: '#c89b7b',
+      boxShadow: '0 0 0 3px rgba(200, 155, 123, 0.15)',
+      backgroundColor: 'white'
+    },
+    searchButton: {
+      position: 'absolute',
+      right: '5px',
+      top: '5px',
+      bottom: '5px',
+      border: 'none',
+      borderRadius: '5px',
+      backgroundColor: 'rgba(28, 36, 54, 0.97)',
+      color: 'white',
+      fontWeight: '600',
+      padding: '0 30px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      fontFamily: "'Poppins', sans-serif",
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    searchButtonHover: {
+      backgroundColor: '#c89b7b'
+    },
+    buttonIcon: {
+      marginRight: '8px'
+    },
+    errorAlert: {
+      backgroundColor: 'rgba(231, 76, 60, 0.15)',
+      color: '#e74c3c',
+      border: '1px solid rgba(231, 76, 60, 0.3)',
+      borderRadius: '8px',
+      padding: '15px',
+      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      maxWidth: '600px',
+      margin: '20px auto',
+      fontWeight: '500'
+    },
+    errorIcon: {
+      marginRight: '10px',
+      fontSize: '18px'
+    },
+    infoBox: {
+      backgroundColor: 'rgba(52, 152, 219, 0.1)',
+      border: '1px solid rgba(52, 152, 219, 0.2)',
+      borderRadius: '8px',
+      padding: '20px',
+      marginBottom: '30px',
+      display: 'flex',
+      alignItems: 'flex-start'
+    },
+    infoIcon: {
+      color: '#3498db',
+      fontSize: '24px',
+      marginRight: '15px',
+      marginTop: '3px'
+    },
+    infoText: {
+      fontSize: '15px',
+      color: '#596275',
+      margin: 0,
+      lineHeight: '1.6'
+    },
+    resultContainer: {
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
+      padding: '30px',
+      maxWidth: '800px',
+      margin: '0 auto',
+      textAlign: 'center',
+      border: '1px solid rgba(0, 0, 0, 0.05)'
+    },
+    resultTitle: {
+      fontSize: '24px',
+      fontWeight: '600',
+      color: '#2c3e50',
+      marginBottom: '25px',
+      fontFamily: "'Poppins', sans-serif",
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    productCode: {
+      backgroundColor: '#f8f9fa',
+      padding: '8px 20px',
+      borderRadius: '20px',
+      fontWeight: '600',
+      marginLeft: '10px'
+    },
+    buttonsContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      gap: '15px',
+      marginTop: '25px'
+    },
+    documentButton: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '12px 25px',
+      backgroundColor: 'rgba(28, 36, 54, 0.97)',
+      color: 'white',
+      border: 'none',
+      borderRadius: '8px',
+      fontWeight: '500',
+      fontSize: '15px',
+      textDecoration: 'none',
+      transition: 'all 0.3s ease',
+      cursor: 'pointer'
+    },
+    techDocButton: {
+      backgroundColor: 'rgba(52, 152, 219, 0.9)'
+    },
+    techDocButtonHover: {
+      backgroundColor: 'rgba(52, 152, 219, 1)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 5px 15px rgba(52, 152, 219, 0.3)'
+    },
+    safetyDocButton: {
+      backgroundColor: 'rgba(46, 204, 113, 0.9)'
+    },
+    safetyDocButtonHover: {
+      backgroundColor: 'rgba(46, 204, 113, 1)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 5px 15px rgba(46, 204, 113, 0.3)'
+    },
+    documentIcon: {
+      marginRight: '10px'
+    },
+    loadingSpinner: {
+      display: 'inline-block',
+      width: '20px',
+      height: '20px',
+      border: '3px solid rgba(255,255,255,.3)',
+      borderRadius: '50%',
+      borderTopColor: 'white',
+      animation: 'spin 1s linear infinite',
+      marginRight: '10px'
+    },
+    '@keyframes spin': {
+      to: { transform: 'rotate(360deg)' }
+    },
+    noDocumentsMessage: {
+      fontSize: '15px',
+      color: '#596275',
+      margin: '15px 0',
+      fontStyle: 'italic'
+    }
+  };
+
+  // Funzione per cercare i prodotti nell'API
+  const searchProductAPI = async (productCode) => {
+    try {
+      setIsLoading(true);
+      
+      // Qui implementerai la chiamata alla tua API backend
+      // const response = await fetch(`/api/products/${productCode}`);
+      // const data = await response.json();
+      // if (data.success) {
+      //   setSearchResult(data.product);
+      //   setShowResult(true);
+      //   setError('');
+      // } else {
+      //   setShowResult(false);
+      //   setError(data.message || 'Codice prodotto non trovato');
+      // }
+      
+      // Per ora, utilizziamo i dati mock
+      setTimeout(() => {
+        const product = mockProducts.find(p => p.code === productCode);
+        
+        if (product) {
+          setSearchResult(product);
+          setShowResult(true);
+          setError('');
+        } else {
+          setShowResult(false);
+          setError('Codice prodotto non trovato nel nostro database. Controlla il codice e riprova.');
+        }
+        
+        setIsLoading(false);
+      }, 800); // Simuliamo un ritardo di caricamento
+      
+    } catch (err) {
+      console.error('Error searching product:', err);
+      setError('Si è verificato un errore durante la ricerca. Riprova più tardi.');
+      setShowResult(false);
+      setIsLoading(false);
+    }
+  };
 
   // This would be replaced with API calls once the backend is implemented
   const mockProducts = [
@@ -19,60 +289,128 @@ const RegulatoryPage = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const product = mockProducts.find(p => p.code === searchInput);
-    
-    if (product) {
-      setSearchResult(product);
-      setShowResult(true);
-      setError('');
-    } else {
-      setShowResult(false);
-      setError('Codice prodotto non trovato');
+    if (searchInput.trim()) {
+      searchProductAPI(searchInput.trim());
     }
   };
 
+  // Stati per effetti hover sui pulsanti documento
+  const [hoveredButton, setHoveredButton] = useState(null);
+
   return (
-    <Container className="py-5">
-      <div id="searchContainer" className="text-center">
-        <h1 className="title">{t('ricercaProdotti')}</h1>
-        <Form onSubmit={handleSearch} className="search-input">
-          <Form.Control
-            type="text"
-            placeholder={t('inserisciProdotto')}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            required
-          />
-          <Button type="submit">{t('cerca')}</Button>
-        </Form>
-      </div>
-
-      {error && <Alert variant="danger" className="mt-3 text-center">{error}</Alert>}
-
-      {showResult && searchResult && (
-        <div id="resultContainer" className="text-center mt-4">
-          <h3 id="productCode">Codice prodotto: {searchResult.code}</h3>
-          <div className="d-flex justify-content-center">
-            <a 
-              href={searchResult.techSheet} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn btn-primary mx-2"
-            >
-              {t('schedaTecnica')}
-            </a>
-            <a 
-              href={searchResult.safetySheet} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn btn-primary mx-2"
-            >
-              {t('schedaSicurezza')}
-            </a>
-          </div>
+    <div style={styles.section}>
+      <Container>
+        <div style={styles.pageHeader}>
+          <h1 style={styles.pageTitle}>
+            REGULATORY
+            <div style={styles.titleDecoration}></div>
+          </h1>
+          <p style={styles.pageSubtitle}>
+            Accedi alle schede tecniche e di sicurezza dei nostri prodotti inserendo il codice prodotto nel campo di ricerca.
+          </p>
         </div>
-      )}
-    </Container>
+        
+        <div style={styles.searchContainer}>
+          <div style={styles.infoBox}>
+            <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
+            <p style={styles.infoText}>
+              Il codice prodotto è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
+            </p>
+          </div>
+          
+          <form onSubmit={handleSearch} style={styles.searchForm}>
+            <input
+              type="text"
+              placeholder="Inserisci il codice prodotto (es. 001)"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              required
+              style={{
+                ...styles.searchInput,
+                ...(focusedInput ? styles.searchInputFocused : {})
+              }}
+              onFocus={() => setFocusedInput(true)}
+              onBlur={() => setFocusedInput(false)}
+            />
+            <button 
+              type="submit" 
+              style={{
+                ...styles.searchButton,
+                ...(buttonHovered ? styles.searchButtonHover : {})
+              }}
+              onMouseEnter={() => setButtonHovered(true)}
+              onMouseLeave={() => setButtonHovered(false)}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span style={styles.loadingSpinner}></span>
+                  Ricerca...
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
+                  Cerca
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {error && (
+          <div style={styles.errorAlert}>
+            <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
+            {error}
+          </div>
+        )}
+
+        {showResult && searchResult && (
+          <div style={styles.resultContainer}>
+            <h3 style={styles.resultTitle}>
+              Documenti disponibili 
+              <span style={styles.productCode}>Cod. {searchResult.code}</span>
+            </h3>
+            
+            <div style={styles.buttonsContainer}>
+              <a 
+                href={searchResult.techSheet} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  ...styles.documentButton,
+                  ...styles.techDocButton,
+                  ...(hoveredButton === 'tech' ? styles.techDocButtonHover : {})
+                }}
+                onMouseEnter={() => setHoveredButton('tech')}
+                onMouseLeave={() => setHoveredButton(null)}
+              >
+                <FontAwesomeIcon icon={faFileAlt} style={styles.documentIcon} />
+                Scheda Tecnica
+              </a>
+              <a 
+                href={searchResult.safetySheet} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{
+                  ...styles.documentButton,
+                  ...styles.safetyDocButton,
+                  ...(hoveredButton === 'safety' ? styles.safetyDocButtonHover : {})
+                }}
+                onMouseEnter={() => setHoveredButton('safety')}
+                onMouseLeave={() => setHoveredButton(null)}
+              >
+                <FontAwesomeIcon icon={faFileShield} style={styles.documentIcon} />
+                Scheda di Sicurezza
+              </a>
+            </div>
+            
+            <p style={styles.noDocumentsMessage}>
+              I documenti si apriranno in una nuova finestra in formato PDF.
+            </p>
+          </div>
+        )}
+      </Container>
+    </div>
   );
 };
 

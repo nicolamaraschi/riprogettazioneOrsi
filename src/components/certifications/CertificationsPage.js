@@ -1,9 +1,9 @@
 // src/components/certifications/CertificationsPage.js
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Carousel } from 'react-bootstrap';
+import { Container, Carousel, Row, Col } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faCheckCircle, faShieldAlt, faLeaf, faAward } from '@fortawesome/free-solid-svg-icons';
 
 // Import certification images
 import bureauVeritasImg from '../../assets/images/bureau veritas.png';
@@ -51,8 +51,8 @@ const CertificationsPage = () => {
         >
           {certifications.map(cert => (
             <Carousel.Item key={cert.id}>
-              <div className="row">
-                <div className="col-lg-6">
+              <Row>
+                <Col lg={6}>
                   <div className="certification-card">
                     <div className="certification-image-container">
                       <img 
@@ -62,8 +62,8 @@ const CertificationsPage = () => {
                       />
                     </div>
                   </div>
-                </div>
-                <div className="col-lg-6">
+                </Col>
+                <Col lg={6}>
                   <div className="certification-card">
                     <div className="certification-content">
                       <h3 className="certification-name">{cert.name}</h3>
@@ -75,8 +75,8 @@ const CertificationsPage = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </Col>
+              </Row>
             </Carousel.Item>
           ))}
         </Carousel>
@@ -93,15 +93,19 @@ const CertificationsPage = () => {
           
           <ul className="certification-commitment-list">
             <li className="certification-commitment-item">
+              <FontAwesomeIcon icon={faCheckCircle} className="certification-icon" />
               <strong>Sistema di Gestione della Qualità</strong> - Applichiamo rigorosi controlli in ogni fase della produzione per garantire prodotti di eccellenza.
             </li>
             <li className="certification-commitment-item">
+              <FontAwesomeIcon icon={faLeaf} className="certification-icon" />
               <strong>Sostenibilità Ambientale</strong> - Utilizziamo processi produttivi a basso impatto ambientale e lavoriamo per ridurre costantemente la nostra impronta ecologica.
             </li>
             <li className="certification-commitment-item">
+              <FontAwesomeIcon icon={faShieldAlt} className="certification-icon" />
               <strong>Innovazione Continua</strong> - Investiamo nella ricerca e sviluppo per migliorare costantemente le formule dei nostri prodotti, rendendoli più efficaci e più sostenibili.
             </li>
             <li className="certification-commitment-item">
+              <FontAwesomeIcon icon={faAward} className="certification-icon" />
               <strong>Trasparenza</strong> - Comunichiamo in modo chiaro e completo la composizione dei nostri prodotti, perché crediamo che i consumatori abbiano diritto a informazioni accurate.
             </li>
           </ul>
