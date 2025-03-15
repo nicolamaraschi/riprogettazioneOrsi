@@ -28,3 +28,4 @@ yarn-error.log*
 # Ignora i file video
 **/src/asset/video/*
 **/src/assets/video/*
+.vercel
