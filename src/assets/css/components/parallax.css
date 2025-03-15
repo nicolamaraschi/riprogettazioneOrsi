@@ -1,0 +1,35 @@
+/* Parallax Section Styles */
+.parallax-section {
+  background-image: url('../../../assets/images/b4mobile.png');
+  background-size: 60%;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-position: 100% center;
+  height: 400px;
+  color: #000000;
+  text-align: left;
+  padding: 100px 0;
+}
+
+.parallax-text {
+  font-size: 40px;
+  float: center;
+  margin-left: 10%;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .parallax-section {
+    background-size: 50%;
+    background-attachment: scroll;
+    height: auto;
+    padding: 50px 0;
+  }
+
+  .parallax-text {
+    font-size: 18px;
+    float: none;
+    margin-right: 0;
+    text-align: left;
+  }
+}

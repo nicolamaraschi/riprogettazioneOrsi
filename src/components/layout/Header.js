@@ -1,6 +1,5 @@
 // src/components/layout/Header.js
-import React from 'react';
-import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
@@ -16,129 +15,251 @@ import germanyFlag from '../../assets/images/germany-flag-icon.png';
 const Header = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeDropdowns, setActiveDropdowns] = useState([]);
 
+  const isHomePage = location.pathname === '/';
+
+  // Handle language change
   const changeLanguage = (lng) => {
     i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
   };
 
-  // Funzione per gestire lo scroll verso le sezioni nella homepage
+  // Detect scroll for header styling
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Function to scroll to section in homepage
   const scrollToSection = (sectionId) => {
+    if (mobileMenuOpen) setMobileMenuOpen(false);
+    
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
-  const isHomePage = location.pathname === '/';
+  // Toggle dropdown for mobile view
+  const toggleDropdown = (dropdownId, event) => {
+    // Solo per vista mobile (< 992px)
+    if (window.innerWidth <= 992) {
+      event.preventDefault(); // Previene il comportamento di default su mobile
+      if (activeDropdowns.includes(dropdownId)) {
+        setActiveDropdowns(activeDropdowns.filter(id => id !== dropdownId));
+      } else {
+        setActiveDropdowns([...activeDropdowns, dropdownId]);
+      }
+    }
+    // In vista desktop, lascia che CSS gestisca l'hover
+  };
+
+  // Get current language
+  const currentLanguage = i18n.language || localStorage.getItem('language') || 'it';
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" sticky="top">
-      <Container>
-        <Navbar.Brand as={Link} to="/" className="ml-0 custom-navbar-brand">
-          <img src={logoOrsi} alt="logo orsi" className="logo-img" />
-          <img src={nomeOrsi} alt="logo orsi" className="logo-img" />
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="navbarNavDropdown" />
-        <Navbar.Collapse id="navbarNavDropdown">
-          <Nav className="ml-auto nav-items">
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section0' : '/'}
-              to={isHomePage ? undefined : '/'}
-              onClick={() => isHomePage && scrollToSection('section0')}
+    <header className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
+      <div className="navbar-container">
+        <div className="brand-section">
+          <Link to="/" className="brand-logo">
+            <img src={logoOrsi} alt="Orsi Logo" />
+            <img src={nomeOrsi} alt="Orsi" />
+          </Link>
+        </div>
+
+        <button 
+          className="mobile-menu-toggle" 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle navigation menu"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </button>
+
+        <div className={`nav-section ${mobileMenuOpen ? 'active' : ''}`}>
+          <ul className="nav-menu">
+            <li className="nav-item">
+              <Link 
+                to="/" 
+                className={`nav-link ${location.pathname === '/' && !location.hash ? 'active' : ''}`} 
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('home')}
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to={isHomePage ? '#section1' : '/#section1'} 
+                className={`nav-link ${location.hash === '#section1' ? 'active' : ''}`}
+                onClick={() => isHomePage ? scrollToSection('section1') : null}
+              >
+                {t('chiSiamo')}
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to={isHomePage ? '#section2' : '/#section2'} 
+                className={`nav-link ${location.hash === '#section2' ? 'active' : ''}`}
+                onClick={() => isHomePage ? scrollToSection('section2') : null}
+              >
+                {t('ricerca')}
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to={isHomePage ? '#section3' : '/#section3'} 
+                className={`nav-link ${location.hash === '#section3' ? 'active' : ''}`}
+                onClick={() => isHomePage ? scrollToSection('section3') : null}
+              >
+                {t('nostriMarchi')}
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to={isHomePage ? '#section4' : '/#section4'} 
+                className={`nav-link ${location.hash === '#section4' ? 'active' : ''}`}
+                onClick={() => isHomePage ? scrollToSection('section4') : null}
+              >
+                {t('Produzione')}
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to={isHomePage ? '#section5' : '/#section5'} 
+                className={`nav-link ${location.hash === '#section5' ? 'active' : ''}`}
+                onClick={() => isHomePage ? scrollToSection('section5') : null}
+              >
+                {t('novita')}
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to={isHomePage ? '#section6' : '/#section6'} 
+                className={`nav-link ${location.hash === '#section6' ? 'active' : ''}`}
+                onClick={() => isHomePage ? scrollToSection('section6') : null}
+              >
+                {t('certificazioni')}
+              </Link>
+            </li>
+            
+            {/* Products Dropdown */}
+            <li className={`nav-item dropdown ${activeDropdowns.includes('products') ? 'open' : ''}`}>
+              <div className="nav-link dropdown-toggle" onClick={(e) => toggleDropdown('products', e)}>
+                {t('prodotti')}
+              </div>
+              <div className="dropdown-menu">
+                {/* Professional Products Nested Dropdown */}
+                <div className={`nested-dropdown ${activeDropdowns.includes('professional') ? 'open' : ''}`}>
+                  <div className="dropdown-item dropdown-toggle" onClick={(e) => toggleDropdown('professional', e)}>
+                    {t('bucatoProfessionale')}
+                  </div>
+                  <div className="dropdown-menu">
+                    <Link to="/products/professional/bit" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      BIT
+                    </Link>
+                    <Link to="/products/professional/dolomitenweiss" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      Dolomiten Weiss
+                    </Link>
+                    <Link to="/products/professional/dolomitenweissbio" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      Dolomiten Weiss Biologico
+                    </Link>
+                    <Link to="/products/professional/tresil" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      Tresil
+                    </Link>
+                  </div>
+                </div>
+                
+                {/* Domestic Products Nested Dropdown */}
+                <div className={`nested-dropdown ${activeDropdowns.includes('domestic') ? 'open' : ''}`}>
+                  <div className="dropdown-item dropdown-toggle" onClick={(e) => toggleDropdown('domestic', e)}>
+                    {t('bucatoDomestico')}
+                  </div>
+                  <div className="dropdown-menu">
+                    <Link to="/products/domestic/suora" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      La Suora
+                    </Link>
+                    <Link to="/products/domestic/orsetto" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      Orsetto
+                    </Link>
+                    <Link to="/products/domestic/orsettobio" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
+                      Orsetto Biologico
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to="/regulatory" 
+                className={`nav-link ${location.pathname === '/regulatory' ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                REGULATORY
+              </Link>
+            </li>
+            
+            <li className="nav-item">
+              <Link 
+                to="/contact" 
+                className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t('contatti')}
+              </Link>
+            </li>
+          </ul>
+          
+          {/* Language Selector */}
+          <div className="language-selector">
+            <button 
+              className={`language-btn ${currentLanguage === 'it' ? 'active' : ''}`} 
+              onClick={() => changeLanguage('it')}
+              aria-label="Italian"
             >
-              {t('home')}
-            </Nav.Link>
-            
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section1' : '/#section1'}
-              to={isHomePage ? undefined : '/#section1'}
-              onClick={() => isHomePage && scrollToSection('section1')}
+              <img src={italyFlag} alt="Italiano" />
+            </button>
+            <button 
+              className={`language-btn ${currentLanguage === 'en' ? 'active' : ''}`} 
+              onClick={() => changeLanguage('en')}
+              aria-label="English"
             >
-              {t('chiSiamo')}
-            </Nav.Link>
-            
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section2' : '/#section2'}
-              to={isHomePage ? undefined : '/#section2'}
-              onClick={() => isHomePage && scrollToSection('section2')}
+              <img src={ukFlag} alt="English" />
+            </button>
+            <button 
+              className={`language-btn ${currentLanguage === 'fr' ? 'active' : ''}`} 
+              onClick={() => changeLanguage('fr')}
+              aria-label="French"
             >
-              {t('ricerca')}
-            </Nav.Link>
-            
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section3' : '/#section3'}
-              to={isHomePage ? undefined : '/#section3'}
-              onClick={() => isHomePage && scrollToSection('section3')}
+              <img src={franceFlag} alt="Français" />
+            </button>
+            <button 
+              className={`language-btn ${currentLanguage === 'de' ? 'active' : ''}`} 
+              onClick={() => changeLanguage('de')}
+              aria-label="German"
             >
-              {t('nostriMarchi')}
-            </Nav.Link>
-            
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section4' : '/#section4'}
-              to={isHomePage ? undefined : '/#section4'}
-              onClick={() => isHomePage && scrollToSection('section4')}
-            >
-              {t('Produzione')}
-            </Nav.Link>
-            
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section5' : '/#section5'}
-              to={isHomePage ? undefined : '/#section5'}
-              onClick={() => isHomePage && scrollToSection('section5')}
-            >
-              {t('novita')}
-            </Nav.Link>
-            
-            <Nav.Link 
-              as={isHomePage ? 'a' : Link} 
-              href={isHomePage ? '#section6' : '/#section6'}
-              to={isHomePage ? undefined : '/#section6'}
-              onClick={() => isHomePage && scrollToSection('section6')}
-            >
-              {t('certificazioni')}
-            </Nav.Link>
-            
-            <NavDropdown title={t('prodotti')} id="navbarDropdown">
-              <NavDropdown title={t('bucatoProfessionale')} id="navbarDropdownBucatoProfessionale" className="dropdown-item dropdown-toggle">
-                <NavDropdown.Item as={Link} to="/products/professional/bit">BIT</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/products/professional/dolomitenweiss">Dolomiten Weiss</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/products/professional/dolomitenweissbio">Dolomiten Weiss Biologico</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/products/professional/tresil">Tresil</NavDropdown.Item>
-              </NavDropdown>
-              
-              <NavDropdown title={t('bucatoDomestico')} id="navbarDropdownBucatoDomestico" className="dropdown-item dropdown-toggle">
-                <NavDropdown.Item as={Link} to="/products/domestic/suora">La Suora</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/products/domestic/orsetto">Orsetto</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/products/domestic/orsettobio">Orsetto Biologico</NavDropdown.Item>
-              </NavDropdown>
-            </NavDropdown>
-            
-            <Nav.Link as={Link} to="/regulatory">REGULATORY</Nav.Link>
-            <Nav.Link as={Link} to="/contact">{t('contatti')}</Nav.Link>
-            
-            <Nav.Link as="button" className="nav-link btn" onClick={() => changeLanguage('it')}>
-              <img src={italyFlag} alt="Italiano" className="icona-bandiera" />
-            </Nav.Link>
-            <Nav.Link as="button" className="nav-link btn" onClick={() => changeLanguage('en')}>
-              <img src={ukFlag} alt="English" className="icona-bandiera" />
-            </Nav.Link>
-            <Nav.Link as="button" className="nav-link btn" onClick={() => changeLanguage('fr')}>
-              <img src={franceFlag} alt="Français" className="icona-bandiera" />
-            </Nav.Link>
-            <Nav.Link as="button" className="nav-link btn" onClick={() => changeLanguage('de')}>
-              <img src={germanyFlag} alt="Deutsch" className="icona-bandiera" />
-            </Nav.Link>
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+              <img src={germanyFlag} alt="Deutsch" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
   );
 };
 

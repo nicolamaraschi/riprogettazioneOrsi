@@ -1,0 +1,74 @@
+/* About Section Styles */
+.our-menu-food {
+    background-color: var(--about-sec);
+    padding: 2rem 7%;
+   }
+   
+   .our-menu-food h2 {
+    color: white;
+    font-size: 45px;
+    text-align: center;
+    padding: 0.5rem 0;
+   }
+   
+   .ecologia-text {
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    line-height: 1.5;
+   }
+   
+   .main-menu-food {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+   }
+   
+   .inner-menu-food {
+    flex: 1 1 calc(25% - 20px);
+    margin: 10px;
+    max-width: calc(25% - 20px);
+   }
+   
+   .menu-food-content {
+    width: 100%;
+   }
+   
+   .menu-food-content img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: cover;
+    opacity: 0.5;
+    transition: opacity 0.5s ease-in-out;
+   }
+   
+   .menu-food-content:hover img {
+    opacity: 1;
+   }
+   
+   .menu-food-text {
+    padding: 2rem;
+   }
+   
+   .menu-food-text h3 {
+    color: #e58f00;
+    font-size: 24px;
+   }
+   
+   .description {
+    color: white;
+   }
+   
+   /* Media Queries */
+   @media (max-width: 768px) {
+     .inner-menu-food {
+       max-width: calc(70% - 20px);
+     }
+   }

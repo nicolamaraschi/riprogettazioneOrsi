@@ -26,48 +26,37 @@ const PartnersSection = () => {
   ];
 
   useEffect(() => {
-    const animateImages = () => {
-      const logoItems = document.querySelectorAll(".client-logos li");
-      let delay = 0;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
 
-      logoItems.forEach((item) => {
-        setTimeout(() => {
-          item.style.opacity = "1";
-          item.style.transform = "translateY(0)";
-        }, delay);
-        delay += 200;
-      });
-    };
+    const cards = document.querySelectorAll('.partner-card');
+    cards.forEach((card) => observer.observe(card));
 
-    const checkScroll = () => {
-      const section = document.querySelector(".our-clients");
-      if (!section) return;
-      
-      const windowHeight = window.innerHeight;
-      const sectionTop = section.getBoundingClientRect().top;
-
-      if (sectionTop < windowHeight) {
-        animateImages();
-        window.removeEventListener("scroll", checkScroll);
-      }
-    };
-
-    window.addEventListener("scroll", checkScroll);
-    return () => window.removeEventListener("scroll", checkScroll);
+    return () => cards.forEach((card) => observer.unobserve(card));
   }, []);
 
   return (
-    <div className="our-clients our-menu-food">
-      <h1 style={{ fontSize: '2em', paddingTop: '2%' }}>{t('partner')}</h1>
-      <ul className="client-logos">
+    <section className="partners-section">
+      <h2 className="partners-section-title">{t('partner')}</h2>
+      <div className="partners-grid">
         {logos.map((logo, index) => (
-          <li key={index}>
-            <img src={logo} alt={`Logo ${index + 1}`} />
-            <img src={logo} alt={`Logo ${index + 1}`} />
-          </li>
+          <div key={index} className="partner-card" style={{animationDelay: `${index * 0.1}s`}}>
+            <img src={logo} alt={`Partner ${index + 1}`} />
+          </div>
         ))}
-      </ul>
-    </div>
+      </div>
+      <p className="partners-message">
+        ORSI collabora con partner di eccellenza per garantire prodotti di alta qualità e soluzioni innovative nel campo della detergenza.
+      </p>
+    </section>
   );
 };
 

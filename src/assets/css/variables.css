@@ -1,0 +1,9 @@
+/* CSS Variables */
+:root {
+  --btn-color: #e58f00;
+  --about-sec: #1d1d23;
+}
+
+* {
+  box-sizing: border-box;
+}

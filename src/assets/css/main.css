@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import "./variables.css";
+@import "./base.css";
+@import "./layout/header.css";
+@import "./layout/footer.css";
+@import "./layout/scroll-to-top.css";
+@import "./components/parallax.css";
+@import "./components/about.css";
+@import "./components/research.css";
+@import "./components/brands.css";
+@import "./components/production.css";
+@import "./components/news.css";
+@import "./components/certifications.css";
+@import "./components/partners.css";
+@import "./components/products.css";
+@import "./pages/contact.css";

@@ -1,0 +1,23 @@
+/* Scroll-to-top Styles */
+#scroll-to-top {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007BFF;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 50%;
+  text-align: center;
+  cursor: pointer;
+  z-index: 999;
+}
+
+#scroll-to-top i {
+  font-size: 20px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  /* Scroll-to-top responsive styles */
+}
