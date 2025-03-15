@@ -1,4 +1,3 @@
-// src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
@@ -32,6 +31,9 @@ import SuoraProductsPage from './components/products/domestic/SuoraProductsPage'
 import OrsettoProductsPage from './components/products/domestic/OrsettoProductsPage';
 import OrsettoBioProductsPage from './components/products/domestic/OrsettoBioProductsPage';
 
+// Importazione della nuova pagina per prodotti filtrati per sottocategoria
+import SubcategoryProducts from './components/prodotti/SubcategoryProducts';
+
 function App() {
   return (
     <I18nextProvider i18n={i18n}>
@@ -45,6 +47,11 @@ function App() {
           <Route path="/production" element={<ProductionPage />} />
           <Route path="/news" element={<NewsPage />} />
           <Route path="/certifications" element={<CertificationsPage />} />
+
+          {/* Nuova route dinamica per i prodotti filtrati per sottocategoria */}
+          <Route path="/products/:categorySlug/:subcategorySlug" element={<SubcategoryProducts />} />
+          
+          {/* Route esistenti per i prodotti */}
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/professional/bit" element={<BitProductsPage />} />
           <Route path="/products/professional/dolomitenweiss" element={<DolomitenWeissProductsPage />} />
@@ -53,6 +60,7 @@ function App() {
           <Route path="/products/domestic/suora" element={<SuoraProductsPage />} />
           <Route path="/products/domestic/orsetto" element={<OrsettoProductsPage />} />
           <Route path="/products/domestic/orsettobio" element={<OrsettoBioProductsPage />} />
+          
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/regulatory" element={<RegulatoryPage />} />
         </Routes>

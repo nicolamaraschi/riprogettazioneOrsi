@@ -15,6 +15,7 @@ const RegulatoryPage = () => {
   const [focusedInput, setFocusedInput] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
   
+  
   // Stili inline
   const styles = {
     section: {
@@ -239,179 +240,182 @@ const RegulatoryPage = () => {
     }
   };
 
-  // Funzione per cercare i prodotti nell'API
-  const searchProductAPI = async (productCode) => {
-    try {
-      setIsLoading(true);
-      
-      // Qui implementerai la chiamata alla tua API backend
-      // const response = await fetch(`/api/products/${productCode}`);
-      // const data = await response.json();
-      // if (data.success) {
-      //   setSearchResult(data.product);
-      //   setShowResult(true);
-      //   setError('');
-      // } else {
-      //   setShowResult(false);
-      //   setError(data.message || 'Codice prodotto non trovato');
-      // }
-      
-      // Per ora, utilizziamo i dati mock
-      setTimeout(() => {
-        const product = mockProducts.find(p => p.code === productCode);
-        
-        if (product) {
-          setSearchResult(product);
-          setShowResult(true);
-          setError('');
-        } else {
-          setShowResult(false);
-          setError('Codice prodotto non trovato nel nostro database. Controlla il codice e riprova.');
-        }
-        
-        setIsLoading(false);
-      }, 800); // Simuliamo un ritardo di caricamento
-      
-    } catch (err) {
-      console.error('Error searching product:', err);
+ // Funzione aggiornata per cercare i documenti tramite API pubblica
+const searchProductAPI = async (documentCode) => {
+  try {
+    setIsLoading(true);
+    
+    // Utilizzo dell'API pubblica senza autenticazione
+    const response = await fetch(`http://localhost:5002/api/documents/public/code/${documentCode}`);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error('Documento non trovato');
+      } else {
+        throw new Error(`Errore HTTP: ${response.status}`);
+      }
+    }
+    
+    const documentData = await response.json();
+    
+    const result = {
+      code: documentData.documentCode,
+      productName: documentData.productName,
+      productCode: documentData.productCode,
+      documentUrl: `http://localhost:5002/${documentData.fileUrl}`
+    };
+    
+    setSearchResult(result);
+    setShowResult(true);
+    setError('');
+    
+  } catch (err) {
+    console.error('Errore durante la ricerca del documento:', err);
+    
+    if (err.message === 'Documento non trovato') {
+      setError('Codice documento non trovato. Verificare il codice e riprovare.');
+    } else {
       setError('Si è verificato un errore durante la ricerca. Riprova più tardi.');
-      setShowResult(false);
-      setIsLoading(false);
     }
-  };
+    
+    setShowResult(false);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  // This would be replaced with API calls once the backend is implemented
-  const mockProducts = [
-    { code: '001', techSheet: '/scheda_tecnica/001_ST.pdf', safetySheet: '/scheda_sicurezza/001_SDS.pdf' },
-    { code: '002', techSheet: '/scheda_tecnica/002_ST.pdf', safetySheet: '/scheda_sicurezza/002_SDS.pdf' },
-    { code: '003', techSheet: '/scheda_tecnica/003_ST.pdf', safetySheet: '/scheda_sicurezza/003_SDS.pdf' },
-  ];
+const handleSearch = (e) => {
+  e.preventDefault();
+  if (searchInput.trim()) {
+    searchProductAPI(searchInput.trim());
+  }
+};
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchInput.trim()) {
-      searchProductAPI(searchInput.trim());
-    }
-  };
+// Stati per effetti hover sui pulsanti documento
+const [hoveredButton, setHoveredButton] = useState(null);
 
-  // Stati per effetti hover sui pulsanti documento
-  const [hoveredButton, setHoveredButton] = useState(null);
-
-  return (
-    <div style={styles.section}>
-      <Container>
-        <div style={styles.pageHeader}>
-          <h1 style={styles.pageTitle}>
-            REGULATORY
-            <div style={styles.titleDecoration}></div>
-          </h1>
-          <p style={styles.pageSubtitle}>
-            Accedi alle schede tecniche e di sicurezza dei nostri prodotti inserendo il codice prodotto nel campo di ricerca.
+return (
+  <div style={styles.section}>
+    <Container>
+      <div style={styles.pageHeader}>
+        <h1 style={styles.pageTitle}>
+          REGULATORY
+          <div style={styles.titleDecoration}></div>
+        </h1>
+        <p style={styles.pageSubtitle}>
+          Accedi alle schede tecniche e di sicurezza dei nostri prodotti inserendo il codice prodotto nel campo di ricerca.
+        </p>
+      </div>
+      
+      <div style={styles.searchContainer}>
+        <div style={styles.infoBox}>
+          <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
+          <p style={styles.infoText}>
+            Il codice documento è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
           </p>
         </div>
         
-        <div style={styles.searchContainer}>
-          <div style={styles.infoBox}>
-            <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
-            <p style={styles.infoText}>
-              Il codice prodotto è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
+        <form onSubmit={handleSearch} style={styles.searchForm}>
+          <input
+            type="text"
+            placeholder="Inserisci il codice documento (es. ORSI_001)"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            required
+            style={{
+              ...styles.searchInput,
+              ...(focusedInput ? styles.searchInputFocused : {})
+            }}
+            onFocus={() => setFocusedInput(true)}
+            onBlur={() => setFocusedInput(false)}
+          />
+          <button 
+            type="submit" 
+            style={{
+              ...styles.searchButton,
+              ...(buttonHovered ? styles.searchButtonHover : {})
+            }}
+            onMouseEnter={() => setButtonHovered(true)}
+            onMouseLeave={() => setButtonHovered(false)}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <span style={styles.loadingSpinner}></span>
+                Ricerca...
+              </>
+            ) : (
+              <>
+                <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
+                Cerca
+              </>
+            )}
+          </button>
+        </form>
+      </div>
+
+      {error && (
+        <div style={styles.errorAlert}>
+          <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
+          {error}
+        </div>
+      )}
+
+      {showResult && searchResult && (
+        <div style={styles.resultContainer}>
+          <h3 style={styles.resultTitle}>
+            Documenti disponibili 
+            <span style={styles.productCode}>Cod. {searchResult.code}</span>
+          </h3>
+          
+          {/* Visualizza il nome del prodotto se disponibile */}
+          {searchResult.productName && (
+            <p style={{ marginBottom: '20px', color: '#596275' }}>
+              <strong>Prodotto:</strong> {searchResult.productName}
             </p>
+          )}
+          
+          <div style={styles.buttonsContainer}>
+            <a 
+              href={searchResult.techSheet} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                ...styles.documentButton,
+                ...styles.techDocButton,
+                ...(hoveredButton === 'tech' ? styles.techDocButtonHover : {})
+              }}
+              onMouseEnter={() => setHoveredButton('tech')}
+              onMouseLeave={() => setHoveredButton(null)}
+            >
+              <FontAwesomeIcon icon={faFileAlt} style={styles.documentIcon} />
+              Scheda Tecnica
+            </a>
+            <a 
+              href={searchResult.safetySheet} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                ...styles.documentButton,
+                ...styles.safetyDocButton,
+                ...(hoveredButton === 'safety' ? styles.safetyDocButtonHover : {})
+              }}
+              onMouseEnter={() => setHoveredButton('safety')}
+              onMouseLeave={() => setHoveredButton(null)}
+            >
+              <FontAwesomeIcon icon={faFileShield} style={styles.documentIcon} />
+              Scheda di Sicurezza
+            </a>
           </div>
           
-          <form onSubmit={handleSearch} style={styles.searchForm}>
-            <input
-              type="text"
-              placeholder="Inserisci il codice prodotto (es. 001)"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              required
-              style={{
-                ...styles.searchInput,
-                ...(focusedInput ? styles.searchInputFocused : {})
-              }}
-              onFocus={() => setFocusedInput(true)}
-              onBlur={() => setFocusedInput(false)}
-            />
-            <button 
-              type="submit" 
-              style={{
-                ...styles.searchButton,
-                ...(buttonHovered ? styles.searchButtonHover : {})
-              }}
-              onMouseEnter={() => setButtonHovered(true)}
-              onMouseLeave={() => setButtonHovered(false)}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span style={styles.loadingSpinner}></span>
-                  Ricerca...
-                </>
-              ) : (
-                <>
-                  <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
-                  Cerca
-                </>
-              )}
-            </button>
-          </form>
+          <p style={styles.noDocumentsMessage}>
+            I documenti si apriranno in una nuova finestra in formato PDF.
+          </p>
         </div>
-
-        {error && (
-          <div style={styles.errorAlert}>
-            <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
-            {error}
-          </div>
-        )}
-
-        {showResult && searchResult && (
-          <div style={styles.resultContainer}>
-            <h3 style={styles.resultTitle}>
-              Documenti disponibili 
-              <span style={styles.productCode}>Cod. {searchResult.code}</span>
-            </h3>
-            
-            <div style={styles.buttonsContainer}>
-              <a 
-                href={searchResult.techSheet} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  ...styles.documentButton,
-                  ...styles.techDocButton,
-                  ...(hoveredButton === 'tech' ? styles.techDocButtonHover : {})
-                }}
-                onMouseEnter={() => setHoveredButton('tech')}
-                onMouseLeave={() => setHoveredButton(null)}
-              >
-                <FontAwesomeIcon icon={faFileAlt} style={styles.documentIcon} />
-                Scheda Tecnica
-              </a>
-              <a 
-                href={searchResult.safetySheet} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{
-                  ...styles.documentButton,
-                  ...styles.safetyDocButton,
-                  ...(hoveredButton === 'safety' ? styles.safetyDocButtonHover : {})
-                }}
-                onMouseEnter={() => setHoveredButton('safety')}
-                onMouseLeave={() => setHoveredButton(null)}
-              >
-                <FontAwesomeIcon icon={faFileShield} style={styles.documentIcon} />
-                Scheda di Sicurezza
-              </a>
-            </div>
-            
-            <p style={styles.noDocumentsMessage}>
-              I documenti si apriranno in una nuova finestra in formato PDF.
-            </p>
-          </div>
-        )}
-      </Container>
-    </div>
-  );
+      )}
+    </Container>
+  </div>
+);
 };
 
 export default RegulatoryPage;

@@ -1,6 +1,6 @@
 // src/components/layout/Header.js
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
 
@@ -18,11 +18,40 @@ import germanyFlag from '../../assets/images/germany-flag-icon.png';
 const Header = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeDropdowns, setActiveDropdowns] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const isHomePage = location.pathname === '/';
+
+  // Funzione per recuperare le categorie dal backend
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('http://localhost:5002/api/gestoreProdotti/categorie');
+      
+      if (!response.ok) {
+        throw new Error(`Errore HTTP: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setCategories(data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Errore durante il recupero delle categorie:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  // Recupera le categorie all'avvio del componente
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Handle language change
   const changeLanguage = (lng) => {
@@ -140,6 +169,26 @@ const Header = () => {
     // In vista desktop, lascia che CSS gestisca l'hover
   };
 
+  // Funzione per navigare ai prodotti di una sottocategoria
+  const navigateToSubcategoryProducts = (categoryId, subcategoryId, categoryName, subcategoryName) => {
+    // Chiudi il menu mobile se aperto
+    if (mobileMenuOpen) setMobileMenuOpen(false);
+    
+    // Costruisci lo slug per l'URL (opzionale, per URL più descrittivi)
+    const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-');
+    const subcategorySlug = subcategoryName.toLowerCase().replace(/\s+/g, '-');
+    
+    // Naviga alla pagina dei prodotti con i parametri necessari
+    navigate(`/products/${categorySlug}/${subcategorySlug}`, {
+      state: {
+        categoryId,
+        subcategoryId,
+        categoryName,
+        subcategoryName
+      }
+    });
+  };
+
   // Get current language
   const currentLanguage = i18n.language || localStorage.getItem('language') || 'it';
 
@@ -149,8 +198,7 @@ const Header = () => {
       display: 'block',
       transition: 'opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease',
       transitionDelay: '0.1s', // Ritardo nella transizione
-    },
-    extraStyles: document.createElement('style')
+    }
   };
 
   // Aggiungiamo CSS dinamico per gestire i menu hover
@@ -303,50 +351,52 @@ const Header = () => {
               </Link>
             </li>
             
-            {/* Products Dropdown */}
+            {/* Products Dropdown - Modificato per usare i dati delle API */}
             <li className={`nav-item dropdown ${activeDropdowns.includes('products') ? 'open' : ''}`}>
               <div className="nav-link dropdown-toggle" onClick={(e) => toggleDropdown('products', e)}>
                 <i className="fas fa-box-open"></i> {t('prodotti')}
               </div>
               <div className="dropdown-menu" style={styles.dropdownMenuStyles}>
-                {/* Professional Products Nested Dropdown */}
-                <div className={`nested-dropdown ${activeDropdowns.includes('professional') ? 'open' : ''}`}>
-                  <div className="dropdown-item dropdown-toggle" onClick={(e) => toggleDropdown('professional', e)}>
-                    <i className="fas fa-briefcase"></i> {t('bucatoProfessionale')}
-                  </div>
-                  <div className="dropdown-menu" style={styles.dropdownMenuStyles}>
-                    <Link to="/products/professional/bit" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> BIT
-                    </Link>
-                    <Link to="/products/professional/dolomitenweiss" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> Dolomiten Weiss
-                    </Link>
-                    <Link to="/products/professional/dolomitenweissbio" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> Dolomiten Weiss Biologico
-                    </Link>
-                    <Link to="/products/professional/tresil" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> Tresil
-                    </Link>
-                  </div>
-                </div>
-                
-                {/* Domestic Products Nested Dropdown */}
-                <div className={`nested-dropdown ${activeDropdowns.includes('domestic') ? 'open' : ''}`}>
-                  <div className="dropdown-item dropdown-toggle" onClick={(e) => toggleDropdown('domestic', e)}>
-                    <i className="fas fa-home"></i> {t('bucatoDomestico')}
-                  </div>
-                  <div className="dropdown-menu" style={styles.dropdownMenuStyles}>
-                    <Link to="/products/domestic/suora" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> La Suora
-                    </Link>
-                    <Link to="/products/domestic/orsetto" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> Orsetto
-                    </Link>
-                    <Link to="/products/domestic/orsettobio" className="dropdown-item" onClick={() => setMobileMenuOpen(false)}>
-                      <i className="fas fa-angle-right"></i> Orsetto Biologico
-                    </Link>
-                  </div>
-                </div>
+                {loading ? (
+                  <div className="dropdown-item">Caricamento categorie...</div>
+                ) : error ? (
+                  <div className="dropdown-item text-danger">Errore: {error}</div>
+                ) : (
+                  // Renderizza dinamicamente le categorie
+                  categories.map(category => (
+                    <div 
+                      key={category._id} 
+                      className={`nested-dropdown ${activeDropdowns.includes(category._id) ? 'open' : ''}`}
+                    >
+                      <div 
+                        className="dropdown-item dropdown-toggle" 
+                        onClick={(e) => toggleDropdown(category._id, e)}
+                      >
+                        <i className="fas fa-briefcase"></i> {category.name}
+                      </div>
+                      <div className="dropdown-menu" style={styles.dropdownMenuStyles}>
+                        {category.subcategories && category.subcategories.length > 0 ? (
+                          category.subcategories.map(subcategory => (
+                            <div
+                              key={subcategory._id || `${category._id}-${subcategory.name}`}
+                              className="dropdown-item"
+                              onClick={() => navigateToSubcategoryProducts(
+                                category._id,
+                                subcategory._id || subcategory.id, // gestisce entrambe le possibili strutture
+                                category.name,
+                                subcategory.name
+                              )}
+                            >
+                              <i className="fas fa-angle-right"></i> {subcategory.name}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="dropdown-item">Nessuna sottocategoria</div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </li>
             
