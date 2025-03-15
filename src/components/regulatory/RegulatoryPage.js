@@ -1,11 +1,16 @@
-// src/components/regulatory/RegulatoryPage.js
-import React, { useState } from 'react';
-import { Container, Row, Col, Alert } from 'react-bootstrap';
+import React, { useState, useCallback, useMemo } from 'react';
+import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faFileAlt, faFileShield, faInfoCircle, faExclamationTriangle } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faSearch, 
+  faFileAlt, 
+  faFileShield, 
+  faInfoCircle, 
+  faExclamationTriangle 
+} from '@fortawesome/free-solid-svg-icons';
 
-const RegulatoryPage = () => {
+const RegulatoryPage = React.memo(() => {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState('');
   const [searchResult, setSearchResult] = useState(null);
@@ -14,7 +19,7 @@ const RegulatoryPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
-  
+  const [hoveredButton, setHoveredButton] = useState(null);
   
   // Stili inline
   const styles = {
@@ -239,183 +244,251 @@ const RegulatoryPage = () => {
       fontStyle: 'italic'
     }
   };
+  const searchProductAPI = useCallback(async (documentCode) => {
+    try {
+      setIsLoading(true);
+      setError('');
+      setSearchResult(null);
+      setShowResult(false);
 
- // Funzione aggiornata per cercare i documenti tramite API pubblica
-const searchProductAPI = async (documentCode) => {
-  try {
-    setIsLoading(true);
-    
-    // Utilizzo dell'API pubblica senza autenticazione
-    const response = await fetch(`http://localhost:5002/api/documents/public/code/${documentCode}`);
-    
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Documento non trovato');
-      } else {
-        throw new Error(`Errore HTTP: ${response.status}`);
-      }
-    }
-    
-    const documentData = await response.json();
-    
-    const result = {
-      code: documentData.documentCode,
-      productName: documentData.productName,
-      productCode: documentData.productCode,
-      documentUrl: `http://localhost:5002/${documentData.fileUrl}`
-    };
-    
-    setSearchResult(result);
-    setShowResult(true);
-    setError('');
-    
-  } catch (err) {
-    console.error('Errore durante la ricerca del documento:', err);
-    
-    if (err.message === 'Documento non trovato') {
-      setError('Codice documento non trovato. Verificare il codice e riprovare.');
-    } else {
-      setError('Si è verificato un errore durante la ricerca. Riprova più tardi.');
-    }
-    
-    setShowResult(false);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-const handleSearch = (e) => {
-  e.preventDefault();
-  if (searchInput.trim()) {
-    searchProductAPI(searchInput.trim());
-  }
-};
-
-// Stati per effetti hover sui pulsanti documento
-const [hoveredButton, setHoveredButton] = useState(null);
-
-return (
-  <div style={styles.section}>
-    <Container>
-      <div style={styles.pageHeader}>
-        <h1 style={styles.pageTitle}>
-          REGULATORY
-          <div style={styles.titleDecoration}></div>
-        </h1>
-        <p style={styles.pageSubtitle}>
-          Accedi alle schede tecniche e di sicurezza dei nostri prodotti inserendo il codice prodotto nel campo di ricerca.
-        </p>
-      </div>
+      console.group('🔍 DEBUG Ricerca Documento');
+      console.log('Codice documento ricercato:', documentCode);
       
-      <div style={styles.searchContainer}>
-        <div style={styles.infoBox}>
-          <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
-          <p style={styles.infoText}>
-            Il codice documento è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
+      const fullUrl = `http://localhost:5002/api/documents/public/code/${documentCode}`;
+      console.log('URL chiamata:', fullUrl);
+
+      const response = await fetch(fullUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('Risposta server:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Dettagli errore:', errorText);
+
+        if (response.status === 404) {
+          throw new Error('Documento non trovato');
+        } else {
+          throw new Error(`Errore HTTP: ${response.status} - ${errorText}`);
+        }
+      }
+
+      const documentData = await response.json();
+      
+      console.log('Dati documento ricevuti:', documentData);
+
+      if (!documentData) {
+        throw new Error('Nessun dato documento ricevuto');
+      }
+
+      const result = {
+        code: documentData.documentCode || 'N/A',
+        productName: documentData.productName || 'Nome prodotto non disponibile',
+        productCode: documentData.productCode || 'N/A',
+        documentType: documentData.type || 'Documento',
+        documentUrl: documentData.fileUrl 
+          ? `http://localhost:5002/${documentData.fileUrl}`
+          : null,
+        techSheet: documentData.type === 'Scheda Tecnica'
+          ? `http://localhost:5002/${documentData.fileUrl}`
+          : null,
+        safetySheet: documentData.type === 'Scheda di Sicurezza'
+          ? `http://localhost:5002/${documentData.fileUrl}`
+          : null
+      };
+
+      console.log('Risultato preparato:', result);
+
+      if (!result.documentUrl) {
+        throw new Error('URL del documento non valido');
+      }
+
+      setSearchResult(result);
+      setShowResult(true);
+      setError('');
+
+      console.groupEnd();
+      
+    } catch (err) {
+      console.group('❌ ERRORE Ricerca Documento');
+      console.error('Tipo errore:', err.constructor.name);
+      console.error('Messaggio errore:', err.message);
+      console.error('Stack trace:', err.stack);
+      console.groupEnd();
+
+      if (err.message === 'Documento non trovato') {
+        setError('Codice documento non trovato. Verificare il codice e riprovare.');
+      } else if (err.message === 'URL del documento non valido') {
+        setError('Il documento non contiene un URL valido.');
+      } else {
+        setError('Si è verificato un errore durante la ricerca. Riprova più tardi.');
+      }
+
+      setShowResult(false);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleSearch = useCallback((e) => {
+    e.preventDefault();
+    if (searchInput.trim()) {
+      searchProductAPI(searchInput.trim());
+    }
+  }, [searchInput, searchProductAPI]);
+
+  // Rendering dei bottoni con componente separato per evitare ri-rendering
+  const DocumentButtons = React.memo(({ result, hoveredButton, setHoveredButton }) => (
+    <div style={styles.buttonsContainer}>
+      <a 
+        href={result.techSheet} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{
+          ...styles.documentButton,
+          ...styles.techDocButton,
+          ...(hoveredButton === 'tech' ? styles.techDocButtonHover : {})
+        }}
+        onMouseEnter={() => setHoveredButton('tech')}
+        onMouseLeave={() => setHoveredButton(null)}
+      >
+        <FontAwesomeIcon icon={faFileAlt} style={styles.documentIcon} />
+        Scheda Tecnica
+      </a>
+      <a 
+        href={result.safetySheet} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        style={{
+          ...styles.documentButton,
+          ...styles.safetyDocButton,
+          ...(hoveredButton === 'safety' ? styles.safetyDocButtonHover : {})
+        }}
+        onMouseEnter={() => setHoveredButton('safety')}
+        onMouseLeave={() => setHoveredButton(null)}
+      >
+        <FontAwesomeIcon icon={faFileShield} style={styles.documentIcon} />
+        Scheda di Sicurezza
+      </a>
+    </div>
+  ));
+
+  return (
+    <div style={styles.section}>
+      <Container>
+        <div style={styles.pageHeader}>
+          <h1 style={styles.pageTitle}>
+            REGULATORY
+            <div style={styles.titleDecoration}></div>
+          </h1>
+          <p style={styles.pageSubtitle}>
+            Accedi alle schede tecniche e di sicurezza dei nostri prodotti inserendo il codice prodotto nel campo di ricerca.
           </p>
         </div>
         
-        <form onSubmit={handleSearch} style={styles.searchForm}>
-          <input
-            type="text"
-            placeholder="Inserisci il codice documento (es. ORSI_001)"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            required
-            style={{
-              ...styles.searchInput,
-              ...(focusedInput ? styles.searchInputFocused : {})
-            }}
-            onFocus={() => setFocusedInput(true)}
-            onBlur={() => setFocusedInput(false)}
-          />
-          <button 
-            type="submit" 
-            style={{
-              ...styles.searchButton,
-              ...(buttonHovered ? styles.searchButtonHover : {})
-            }}
-            onMouseEnter={() => setButtonHovered(true)}
-            onMouseLeave={() => setButtonHovered(false)}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <span style={styles.loadingSpinner}></span>
-                Ricerca...
-              </>
-            ) : (
-              <>
-                <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
-                Cerca
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-
-      {error && (
-        <div style={styles.errorAlert}>
-          <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
-          {error}
-        </div>
-      )}
-
-      {showResult && searchResult && (
-        <div style={styles.resultContainer}>
-          <h3 style={styles.resultTitle}>
-            Documenti disponibili 
-            <span style={styles.productCode}>Cod. {searchResult.code}</span>
-          </h3>
-          
-          {/* Visualizza il nome del prodotto se disponibile */}
-          {searchResult.productName && (
-            <p style={{ marginBottom: '20px', color: '#596275' }}>
-              <strong>Prodotto:</strong> {searchResult.productName}
+        <div style={styles.searchContainer}>
+          <div style={styles.infoBox}>
+            <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
+            <p style={styles.infoText}>
+              Il codice documento è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
             </p>
-          )}
-          
-          <div style={styles.buttonsContainer}>
-            <a 
-              href={searchResult.techSheet} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{
-                ...styles.documentButton,
-                ...styles.techDocButton,
-                ...(hoveredButton === 'tech' ? styles.techDocButtonHover : {})
-              }}
-              onMouseEnter={() => setHoveredButton('tech')}
-              onMouseLeave={() => setHoveredButton(null)}
-            >
-              <FontAwesomeIcon icon={faFileAlt} style={styles.documentIcon} />
-              Scheda Tecnica
-            </a>
-            <a 
-              href={searchResult.safetySheet} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{
-                ...styles.documentButton,
-                ...styles.safetyDocButton,
-                ...(hoveredButton === 'safety' ? styles.safetyDocButtonHover : {})
-              }}
-              onMouseEnter={() => setHoveredButton('safety')}
-              onMouseLeave={() => setHoveredButton(null)}
-            >
-              <FontAwesomeIcon icon={faFileShield} style={styles.documentIcon} />
-              Scheda di Sicurezza
-            </a>
           </div>
           
-          <p style={styles.noDocumentsMessage}>
-            I documenti si apriranno in una nuova finestra in formato PDF.
-          </p>
+          <form onSubmit={handleSearch} style={styles.searchForm}>
+            <input
+              type="text"
+              placeholder="Inserisci il codice documento (es. ORSI_001)"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              required
+              style={{
+                ...styles.searchInput,
+                ...(focusedInput ? styles.searchInputFocused : {})
+              }}
+              onFocus={() => setFocusedInput(true)}
+              onBlur={() => setFocusedInput(false)}
+            />
+            <button 
+              type="submit" 
+              style={{
+                ...styles.searchButton,
+                ...(buttonHovered ? styles.searchButtonHover : {})
+              }}
+              onMouseEnter={() => setButtonHovered(true)}
+              onMouseLeave={() => setButtonHovered(false)}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span style={styles.loadingSpinner}></span>
+                  Ricerca...
+                </>
+              ) : (
+                <>
+                  <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
+                  Cerca
+                </>
+              )}
+            </button>
+          </form>
         </div>
-      )}
-    </Container>
-  </div>
-);
-};
+
+        {error && (
+          <div style={styles.errorAlert}>
+            <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
+            {error}
+          </div>
+        )}
+
+{showResult && searchResult && (
+          <div style={styles.resultContainer}>
+            <h3 style={styles.resultTitle}>
+              Documenti disponibili 
+              <span style={styles.productCode}>Cod. {searchResult.code}</span>
+            </h3>
+            
+            {searchResult.productName && (
+              <p style={{ marginBottom: '20px', color: '#596275' }}>
+                <strong>Prodotto:</strong> {searchResult.productName}
+              </p>
+            )}
+            
+            <DocumentButtons 
+              result={searchResult} 
+              hoveredButton={hoveredButton} 
+              setHoveredButton={setHoveredButton} 
+            />
+            
+            <p style={styles.noDocumentsMessage}>
+              I documenti si apriranno in una nuova finestra in formato PDF.
+            </p>
+
+            {/* DEBUG: Link diretto */}
+            {process.env.NODE_ENV === 'development' && (
+              <div style={{marginTop: '20px', fontSize: '12px', color: '#666'}}>
+                <strong>Debug URL Documento:</strong>
+                <a 
+                  href={searchResult.documentUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  Apri documento direttamente
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+      </Container>
+    </div>
+  );
+});
 
 export default RegulatoryPage;
