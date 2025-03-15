@@ -21,3 +21,10 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ignora tutti i file nella cartella uploads
+**/uploads/*
+
+# Ignora i file video
+**/src/asset/video/*
+**/src/assets/video/*

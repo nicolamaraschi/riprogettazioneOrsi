@@ -1,5 +1,5 @@
 // src/components/home/AboutSection.js
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 
@@ -8,9 +8,14 @@ import responsabileImg from '../../assets/images/responsabile.png';
 import menu2Img from '../../assets/images/menu2.png';
 import worldEnvironmentImg from '../../assets/images/world-environment.png';
 import prendersiCuraImg from '../../assets/images/prendersi cura.webp';
+// Importazione del video
+import companyVideo from '../../assets/video/video.mp4';
 
 const AboutSection = () => {
   const { t } = useTranslation();
+  const videoRef = useRef(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
   // Stili inline
   const styles = {
@@ -57,6 +62,93 @@ const AboutSection = () => {
       height: '3px',
       background: 'linear-gradient(90deg, #c89b7b, #e2b77e)',
       borderRadius: '1.5px'
+    },
+    videoContainer: {
+      maxWidth: '860px',
+      margin: '0 auto 50px',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+      position: 'relative',
+      aspectRatio: '16/9',
+      border: '3px solid rgba(226, 183, 126, 0.5)',
+      cursor: 'pointer'
+    },
+    videoOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      transition: 'opacity 0.3s ease'
+    },
+    playButton: {
+      width: '80px',
+      height: '80px',
+      borderRadius: '50%',
+      backgroundColor: 'rgba(226, 183, 126, 0.9)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      cursor: 'pointer',
+      transition: 'transform 0.3s ease, background-color 0.3s ease',
+      border: '3px solid rgba(255, 255, 255, 0.8)',
+      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)'
+    },
+    playButtonHover: {
+      transform: 'scale(1.1)',
+      backgroundColor: 'rgba(226, 183, 126, 1)'
+    },
+    playIcon: {
+      width: '0',
+      height: '0',
+      borderTop: '15px solid transparent',
+      borderBottom: '15px solid transparent',
+      borderLeft: '25px solid white',
+      marginLeft: '8px'
+    },
+    video: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      display: 'block'
+    },
+    videoLoading: {
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(28, 36, 54, 0.9)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      color: 'white',
+      fontSize: '18px'
+    },
+    loadingSpinner: {
+      display: 'inline-block',
+      width: '40px',
+      height: '40px',
+      border: '4px solid rgba(255,255,255,.3)',
+      borderRadius: '50%',
+      borderTopColor: '#e2b77e',
+      animation: 'spin 1s ease-in-out infinite',
+      marginRight: '15px'
+    },
+    '@keyframes spin': {
+      to: { transform: 'rotate(360deg)' }
+    },
+    videoCaption: {
+      fontSize: '16px',
+      textAlign: 'center',
+      color: 'rgba(255, 255, 255, 0.7)',
+      marginTop: '15px',
+      fontStyle: 'italic'
     },
     subtitle: {
       fontSize: '24px',
@@ -131,7 +223,45 @@ const AboutSection = () => {
   };
 
   // Stato per l'effetto hover
-  const [hoveredCard, setHoveredCard] = React.useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [playButtonHovered, setPlayButtonHovered] = useState(false);
+
+  // Funzione per gestire il play/pause del video
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(e => {
+          console.error("Video play failed:", e);
+        });
+      }
+    }
+  };
+
+  // Effetto per rilevare quando il video è in pausa o in riproduzione
+  useEffect(() => {
+    const video = videoRef.current;
+    
+    if (!video) return;
+    
+    const handlePlay = () => setIsVideoPlaying(true);
+    const handlePause = () => setIsVideoPlaying(false);
+    const handleEnded = () => setIsVideoPlaying(false);
+    const handleCanPlayThrough = () => setVideoLoaded(true);
+    
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('pause', handlePause);
+    video.addEventListener('ended', handleEnded);
+    video.addEventListener('canplaythrough', handleCanPlayThrough);
+    
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('pause', handlePause);
+      video.removeEventListener('ended', handleEnded);
+      video.removeEventListener('canplaythrough', handleCanPlayThrough);
+    };
+  }, []);
 
   const valuesData = [
     {
@@ -168,6 +298,44 @@ const AboutSection = () => {
           CHI SIAMO
           <div style={styles.titleDecoration}></div>
         </h2>
+        
+        {/* Video Presentazione */}
+        <div style={styles.videoContainer} onClick={toggleVideo}>
+          <video 
+            ref={videoRef}
+            style={styles.video}
+            poster="../../assets/images/video-poster.jpg"
+            preload="auto"
+          >
+            <source src={companyVideo} type="video/mp4" />
+            Il tuo browser non supporta i video HTML5.
+          </video>
+          
+          {!videoLoaded && (
+            <div style={styles.videoLoading}>
+              <div style={styles.loadingSpinner}></div>
+              Caricamento video...
+            </div>
+          )}
+          
+          {!isVideoPlaying && videoLoaded && (
+            <div style={styles.videoOverlay}>
+              <div 
+                style={{
+                  ...styles.playButton,
+                  ...(playButtonHovered ? styles.playButtonHover : {})
+                }}
+                onMouseEnter={() => setPlayButtonHovered(true)}
+                onMouseLeave={() => setPlayButtonHovered(false)}
+              >
+                <div style={styles.playIcon}></div>
+              </div>
+            </div>
+          )}
+        </div>
+        <p style={styles.videoCaption}>
+          Scopri la storia e i valori di ORSI: tradizione italiana dal 1907
+        </p>
         
         <p style={styles.description}>
           Nata a Bologna nel <span style={styles.year}>1907</span>, <span style={styles.highlightText}>ORSI</span> è una delle poche realtà italiane di rilievo nel mercato della detergenza in polvere domestica ed istituzionale. Competiamo per esperienza, tecnologia e qualità con le aziende leader del settore. Oggi, <span style={styles.highlightText}>ORSI</span> investe in Ricerca e Sviluppo per innovare nel campo della detergenza e della cosmesi.
