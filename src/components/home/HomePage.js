@@ -5,9 +5,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import ParallaxSection from './ParallaxSection';
 
-// Verifica i nomi corretti dei componenti nel tuo progetto
+// Importa tutti i componenti delle sezioni
 import AboutSection from './AboutSection';
 import ResearchSection from './ResearchSection';
+import ParallaxDivider from './ParallaxDivider'; // Nuovo componente
 import BrandsSection from './BrandsSection';
 import ProductionSection from './ProductionSection';
 import NewsSection from './NewsSection';
@@ -55,6 +56,9 @@ const HomePage = () => {
       
       <div id="section2"></div>
       <ResearchSection />
+      
+      {/* Inseriamo qui il divider parallax */}
+      <ParallaxDivider />
       
       <div id="section3"></div>
       <BrandsSection />

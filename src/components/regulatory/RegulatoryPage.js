@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Container } from 'react-bootstrap';
 import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +10,9 @@ import {
   faExclamationTriangle 
 } from '@fortawesome/free-solid-svg-icons';
 
+// Import the regulatory image
+import regulatoryImage from '../../assets/images/regulatory.png';
+
 const RegulatoryPage = React.memo(() => {
   const { t } = useTranslation();
   const [searchInput, setSearchInput] = useState('');
@@ -20,21 +23,102 @@ const RegulatoryPage = React.memo(() => {
   const [focusedInput, setFocusedInput] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
   const [hoveredButton, setHoveredButton] = useState(null);
+  const parallaxRef = useRef(null);
+  
+  // Parallax effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (parallaxRef.current) {
+        const scrollPosition = window.pageYOffset;
+        // Adjust the movement speed for the parallax effect by changing the divisor (higher = slower)
+        const offset = scrollPosition / 2.5;
+        parallaxRef.current.style.transform = `translateY(${offset}px)`;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
   
   // Stili inline
   const styles = {
     section: {
-      padding: '90px 0 70px',
+      padding: '0 0 70px',
       backgroundColor: '#f8f9fa',
       minHeight: '85vh',
       position: 'relative'
     },
-    pageHeader: {
-      textAlign: 'center',
-      marginBottom: '50px',
+    parallaxContainer: {
+      height: '500px',
+      overflow: 'hidden',
       position: 'relative',
+      marginBottom: '60px'
+    },
+    parallaxBackground: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '400px', // Make image taller to accommodate movement
+      backgroundImage: `url(${regulatoryImage})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center center',
+      zIndex: 1,
+      // Will be animated with JavaScript
+      transform: 'translateY(0)',
+      filter: 'brightness(0.7)',
+      transition: 'transform 0.1s ease-out'
+    },
+    parallaxContent: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 2,
+      color: 'white',
+      textAlign: 'center',
       padding: '0 20px'
     },
+    parallaxTitle: {
+      fontSize: '60px',
+      fontWeight: '700',
+      marginBottom: '20px',
+      textShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+      fontFamily: "'Poppins', sans-serif"
+    },
+    parallaxSubtitle: {
+      fontSize: '22px',
+      maxWidth: '800px',
+      margin: '0 auto',
+      lineHeight: '1.8',
+      textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)'
+    },
+    contentSection: {
+      position: 'relative',
+      zIndex: 3,
+    },
+    searchContainer: {
+      backgroundColor: 'white',
+      borderRadius: '12px',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
+      padding: '40px',
+      maxWidth: '800px',
+      margin: '-100px auto 60px',
+      position: 'relative',
+      overflow: 'hidden',
+      border: '1px solid rgba(0, 0, 0, 0.05)',
+      zIndex: 4
+    },
+    // ... Resto degli stili come prima ...
+    
+    // Stili esistenti...
     pageTitle: {
       fontSize: '40px',
       fontWeight: '700',
@@ -61,17 +145,6 @@ const RegulatoryPage = React.memo(() => {
       maxWidth: '800px',
       margin: '0 auto 20px',
       lineHeight: '1.8'
-    },
-    searchContainer: {
-      backgroundColor: 'white',
-      borderRadius: '12px',
-      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
-      padding: '40px',
-      maxWidth: '800px',
-      margin: '0 auto 60px',
-      position: 'relative',
-      overflow: 'hidden',
-      border: '1px solid rgba(0, 0, 0, 0.05)'
     },
     searchForm: {
       display: 'flex',
@@ -244,6 +317,7 @@ const RegulatoryPage = React.memo(() => {
       fontStyle: 'italic'
     }
   };
+
   const searchProductAPI = useCallback(async (documentCode) => {
     try {
       setIsLoading(true);
@@ -383,110 +457,116 @@ const RegulatoryPage = React.memo(() => {
 
   return (
     <div style={styles.section}>
-      <Container>
-        <div style={styles.pageHeader}>
-          <h1 style={styles.pageTitle}>
-            REGULATORY
-            <div style={styles.titleDecoration}></div>
-          </h1>
-          <p style={styles.pageSubtitle}>
-            Accedi alle schede tecniche e di sicurezza dei nostri prodotti inserendo il codice prodotto nel campo di ricerca.
+      {/* Parallax header section */}
+      <div style={styles.parallaxContainer}>
+        <div 
+          ref={parallaxRef}
+          style={styles.parallaxBackground}
+        ></div>
+        <div style={styles.parallaxContent}>
+          <h1 style={styles.parallaxTitle}>REGULATORY</h1>
+          <p style={styles.parallaxSubtitle}>
+            Accedi alle schede tecniche e di sicurezza dei nostri prodotti
           </p>
         </div>
-        
-        <div style={styles.searchContainer}>
-          <div style={styles.infoBox}>
-            <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
-            <p style={styles.infoText}>
-              Il codice documento è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
-            </p>
-          </div>
-          
-          <form onSubmit={handleSearch} style={styles.searchForm}>
-            <input
-              type="text"
-              placeholder="Inserisci il codice documento (es. ORSI_001)"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              required
-              style={{
-                ...styles.searchInput,
-                ...(focusedInput ? styles.searchInputFocused : {})
-              }}
-              onFocus={() => setFocusedInput(true)}
-              onBlur={() => setFocusedInput(false)}
-            />
-            <button 
-              type="submit" 
-              style={{
-                ...styles.searchButton,
-                ...(buttonHovered ? styles.searchButtonHover : {})
-              }}
-              onMouseEnter={() => setButtonHovered(true)}
-              onMouseLeave={() => setButtonHovered(false)}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span style={styles.loadingSpinner}></span>
-                  Ricerca...
-                </>
-              ) : (
-                <>
-                  <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
-                  Cerca
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-
-        {error && (
-          <div style={styles.errorAlert}>
-            <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
-            {error}
-          </div>
-        )}
-
-{showResult && searchResult && (
-          <div style={styles.resultContainer}>
-            <h3 style={styles.resultTitle}>
-              Documenti disponibili 
-              <span style={styles.productCode}>Cod. {searchResult.code}</span>
-            </h3>
-            
-            {searchResult.productName && (
-              <p style={{ marginBottom: '20px', color: '#596275' }}>
-                <strong>Prodotto:</strong> {searchResult.productName}
+      </div>
+      
+      <div style={styles.contentSection}>
+        <Container>
+          <div style={styles.searchContainer}>
+            <div style={styles.infoBox}>
+              <FontAwesomeIcon icon={faInfoCircle} style={styles.infoIcon} />
+              <p style={styles.infoText}>
+                Il codice documento è disponibile sull'etichetta di ciascun prodotto ORSI. Se hai difficoltà a trovare il codice o desideri ulteriori informazioni, contatta il nostro servizio clienti.
               </p>
-            )}
+            </div>
             
-            <DocumentButtons 
-              result={searchResult} 
-              hoveredButton={hoveredButton} 
-              setHoveredButton={setHoveredButton} 
-            />
-            
-            <p style={styles.noDocumentsMessage}>
-              I documenti si apriranno in una nuova finestra in formato PDF.
-            </p>
-
-            {/* DEBUG: Link diretto */}
-            {process.env.NODE_ENV === 'development' && (
-              <div style={{marginTop: '20px', fontSize: '12px', color: '#666'}}>
-                <strong>Debug URL Documento:</strong>
-                <a 
-                  href={searchResult.documentUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  Apri documento direttamente
-                </a>
-              </div>
-            )}
+            <form onSubmit={handleSearch} style={styles.searchForm}>
+              <input
+                type="text"
+                placeholder="Inserisci il codice documento (es. ORSI_001)"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                required
+                style={{
+                  ...styles.searchInput,
+                  ...(focusedInput ? styles.searchInputFocused : {})
+                }}
+                onFocus={() => setFocusedInput(true)}
+                onBlur={() => setFocusedInput(false)}
+              />
+              <button 
+                type="submit" 
+                style={{
+                  ...styles.searchButton,
+                  ...(buttonHovered ? styles.searchButtonHover : {})
+                }}
+                onMouseEnter={() => setButtonHovered(true)}
+                onMouseLeave={() => setButtonHovered(false)}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span style={styles.loadingSpinner}></span>
+                    Ricerca...
+                  </>
+                ) : (
+                  <>
+                    <FontAwesomeIcon icon={faSearch} style={styles.buttonIcon} />
+                    Cerca
+                  </>
+                )}
+              </button>
+            </form>
           </div>
-        )}
-      </Container>
+
+          {error && (
+            <div style={styles.errorAlert}>
+              <FontAwesomeIcon icon={faExclamationTriangle} style={styles.errorIcon} />
+              {error}
+            </div>
+          )}
+
+          {showResult && searchResult && (
+            <div style={styles.resultContainer}>
+              <h3 style={styles.resultTitle}>
+                Documenti disponibili 
+                <span style={styles.productCode}>Cod. {searchResult.code}</span>
+              </h3>
+              
+              {searchResult.productName && (
+                <p style={{ marginBottom: '20px', color: '#596275' }}>
+                  <strong>Prodotto:</strong> {searchResult.productName}
+                </p>
+              )}
+              
+              <DocumentButtons 
+                result={searchResult} 
+                hoveredButton={hoveredButton} 
+                setHoveredButton={setHoveredButton} 
+              />
+              
+              <p style={styles.noDocumentsMessage}>
+                I documenti si apriranno in una nuova finestra in formato PDF.
+              </p>
+
+              {/* DEBUG: Link diretto */}
+              {process.env.NODE_ENV === 'development' && (
+                <div style={{marginTop: '20px', fontSize: '12px', color: '#666'}}>
+                  <strong>Debug URL Documento:</strong>
+                  <a 
+                    href={searchResult.documentUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Apri documento direttamente
+                  </a>
+                </div>
+              )}
+            </div>
+          )}
+        </Container>
+      </div>
     </div>
   );
 });

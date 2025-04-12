@@ -1,9 +1,9 @@
 // src/components/home/CertificationsSection.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Carousel, Row, Col, Container } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarAlt, faAward, faCheck, faShieldAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarAlt, faAward, faCheck, faShieldAlt, faChevronLeft, faChevronRight, faHandPointRight, faHandPointLeft } from '@fortawesome/free-solid-svg-icons';
 
 // Import certification images
 import bureauVeritasImg from '../../assets/images/bureau veritas.png';
@@ -11,6 +11,8 @@ import certificatoBiologicoImg from '../../assets/images/certificato biologico.p
 
 const CertificationsSection = () => {
   const { t } = useTranslation();
+  const [hoveredControl, setHoveredControl] = useState(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   
   // Certification data
   const certifications = [
@@ -31,6 +33,78 @@ const CertificationsSection = () => {
       validUntil: '2025-03-09'
     }
   ];
+
+  // Funzioni per gestire la navigazione del carosello
+  const nextSlide = () => {
+    setActiveIndex((prevIndex) => (prevIndex + 1) % certifications.length);
+  };
+
+  const prevSlide = () => {
+    setActiveIndex((prevIndex) => (prevIndex - 1 + certifications.length) % certifications.length);
+  };
+
+  // Gestione touch swipe per dispositivi mobili
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    const handleTouchStart = (e) => {
+      touchStartX = e.touches[0].clientX;
+    };
+    
+    const handleTouchMove = (e) => {
+      touchEndX = e.touches[0].clientX;
+    };
+    
+    const handleTouchEnd = () => {
+      if (touchStartX - touchEndX > 50) {
+        // Swipe a sinistra - vai al prossimo
+        nextSlide();
+      } else if (touchEndX - touchStartX > 50) {
+        // Swipe a destra - vai al precedente
+        prevSlide();
+      }
+    };
+    
+    const carouselElement = document.querySelector('.certification-carousel');
+    
+    if (carouselElement) {
+      carouselElement.addEventListener('touchstart', handleTouchStart);
+      carouselElement.addEventListener('touchmove', handleTouchMove);
+      carouselElement.addEventListener('touchend', handleTouchEnd);
+      
+      return () => {
+        carouselElement.removeEventListener('touchstart', handleTouchStart);
+        carouselElement.removeEventListener('touchmove', handleTouchMove);
+        carouselElement.removeEventListener('touchend', handleTouchEnd);
+      };
+    }
+  }, []);
+
+  // Aggiungi stile CSS per l'animazione dello swipe
+  useEffect(() => {
+    const styleEl = document.createElement('style');
+    styleEl.textContent = `
+      @keyframes swipeHint {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(10px); }
+      }
+      
+      .swipe-hint {
+        animation: swipeHint 1.5s infinite;
+        display: inline-block;
+      }
+      
+      .carousel-item {
+        transition: transform 0.6s ease-in-out, opacity 0.6s ease-in-out;
+      }
+    `;
+    document.head.appendChild(styleEl);
+    
+    return () => {
+      document.head.removeChild(styleEl);
+    };
+  }, []);
 
   // Stili inline
   const styles = {
@@ -67,21 +141,33 @@ const CertificationsSection = () => {
       padding: '20px 0'
     },
     carouselControls: {
-      border: 'none',
-      width: '45px',
-      height: '45px',
+      position: 'absolute',
+      width: '100%',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '0 15px',
+      zIndex: 10
+    },
+    carouselButton: {
+      width: '50px',
+      height: '50px',
       borderRadius: '50%',
-      backgroundColor: 'rgba(28, 36, 54, 0.8)',
+      backgroundColor: 'rgba(200, 155, 123, 0.9)',
       color: 'white',
+      border: 'none',
+      fontSize: '24px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      position: 'absolute',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      zIndex: 10,
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+      cursor: 'pointer',
+      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
       transition: 'all 0.3s ease'
+    },
+    carouselButtonHover: {
+      backgroundColor: '#c89b7b',
+      transform: 'scale(1.1)'
     },
     card: {
       backgroundColor: 'white',
@@ -177,6 +263,39 @@ const CertificationsSection = () => {
     benefitText: {
       fontSize: '14px',
       color: '#596275'
+    },
+    carouselIndicator: {
+      textAlign: 'center',
+      marginTop: '30px'
+    },
+    indicator: {
+      display: 'inline-block',
+      width: '12px',
+      height: '12px',
+      borderRadius: '50%',
+      backgroundColor: 'rgba(200, 155, 123, 0.3)',
+      margin: '0 6px',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease'
+    },
+    activeIndicator: {
+      backgroundColor: '#c89b7b',
+      transform: 'scale(1.3)'
+    },
+    instructionText: {
+      textAlign: 'center',
+      fontSize: '15px',
+      color: '#777',
+      margin: '10px 0 25px',
+      fontStyle: 'italic',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '10px'
+    },
+    swipeHint: {
+      display: 'inline-block',
+      animation: 'swipeHint 1.5s infinite'
     }
   };
 
@@ -188,74 +307,120 @@ const CertificationsSection = () => {
           <div style={styles.titleDecoration}></div>
         </h2>
         
-        <div style={styles.carouselContainer}>
-          <Carousel
-            indicators={true}
-            controls={true}
-            interval={5000}
-            nextIcon={<span style={{ fontSize: '18px' }}>›</span>}
-            prevIcon={<span style={{ fontSize: '18px' }}>‹</span>}
-            nextLabel=""
-            prevLabel=""
-          >
-            {certifications.map(cert => (
-              <Carousel.Item key={cert.id}>
-                <Row className="align-items-stretch">
-                  <Col lg={5} className="mb-4 mb-lg-0">
-                    <div style={styles.card}>
-                      <div style={styles.imageContainer}>
-                        <img 
-                          src={cert.image} 
-                          alt={cert.name} 
-                          style={styles.image}
-                        />
-                      </div>
+        {/* Istruzioni per lo scorrimento */}
+        <div style={styles.instructionText}>
+          <FontAwesomeIcon icon={faHandPointRight} className="swipe-hint" />
+          <span>Scorri per visualizzare tutte le nostre certificazioni</span>
+          <FontAwesomeIcon icon={faHandPointLeft} className="swipe-hint" style={{transform: 'scaleX(-1)'}} />
+        </div>
+        
+        <div style={styles.carouselContainer} className="certification-carousel">
+          <div style={styles.carouselControls}>
+            <button 
+              style={{
+                ...styles.carouselButton,
+                ...(hoveredControl === 'prev' ? styles.carouselButtonHover : {})
+              }}
+              onClick={prevSlide}
+              onMouseEnter={() => setHoveredControl('prev')}
+              onMouseLeave={() => setHoveredControl(null)}
+              aria-label="Certificazione precedente"
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            
+            <button 
+              style={{
+                ...styles.carouselButton,
+                ...(hoveredControl === 'next' ? styles.carouselButtonHover : {})
+              }}
+              onClick={nextSlide}
+              onMouseEnter={() => setHoveredControl('next')}
+              onMouseLeave={() => setHoveredControl(null)}
+              aria-label="Certificazione successiva"
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
+          
+          {certifications.map((cert, index) => (
+            <div 
+              key={cert.id} 
+              style={{ 
+                display: index === activeIndex ? 'block' : 'none',
+                transition: 'opacity 0.5s ease'
+              }}
+            >
+              <Row className="align-items-stretch">
+                <Col lg={5} className="mb-4 mb-lg-0">
+                  <div style={styles.card}>
+                    <div style={styles.imageContainer}>
+                      <img 
+                        src={cert.image} 
+                        alt={cert.name} 
+                        style={styles.image}
+                      />
                     </div>
-                  </Col>
-                  <Col lg={7}>
-                    <div style={styles.card}>
-                      <div style={styles.contentCard}>
-                        <div>
-                          <h3 style={styles.certName}>
-                            {cert.name}
-                            <div style={styles.certNameUnderline}></div>
-                          </h3>
-                          <p style={styles.description}>{cert.description}</p>
-                          
-                          <ul style={styles.benefits}>
-                            <li style={styles.benefitItem}>
-                              <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
-                              <span style={styles.benefitText}>Conformità agli standard internazionali più rigorosi</span>
-                            </li>
-                            <li style={styles.benefitItem}>
-                              <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
-                              <span style={styles.benefitText}>Processi produttivi verificati e controllati</span>
-                            </li>
-                            <li style={styles.benefitItem}>
-                              <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
-                              <span style={styles.benefitText}>Garanzia di qualità per i nostri clienti</span>
-                            </li>
-                          </ul>
-                        </div>
+                  </div>
+                </Col>
+                <Col lg={7}>
+                  <div style={styles.card}>
+                    <div style={styles.contentCard}>
+                      <div>
+                        <h3 style={styles.certName}>
+                          {cert.name}
+                          <div style={styles.certNameUnderline}></div>
+                        </h3>
+                        <p style={styles.description}>{cert.description}</p>
                         
-                        <div style={styles.metaInfo}>
-                          <FontAwesomeIcon icon={faCalendarAlt} style={styles.metaIcon} />
-                          <span style={styles.metaLabel}>Valida fino al:</span>
-                          <span style={styles.metaValue}>
-                            {new Date(cert.validUntil).toLocaleDateString('it-IT', { 
-                              day: 'numeric', 
-                              month: 'long', 
-                              year: 'numeric' 
-                            })}
-                          </span>
-                        </div>
+                        <ul style={styles.benefits}>
+                          <li style={styles.benefitItem}>
+                            <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
+                            <span style={styles.benefitText}>Conformità agli standard internazionali più rigorosi</span>
+                          </li>
+                          <li style={styles.benefitItem}>
+                            <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
+                            <span style={styles.benefitText}>Processi produttivi verificati e controllati</span>
+                          </li>
+                          <li style={styles.benefitItem}>
+                            <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
+                            <span style={styles.benefitText}>Garanzia di qualità per i nostri clienti</span>
+                          </li>
+                        </ul>
+                      </div>
+                      
+                      <div style={styles.metaInfo}>
+                        <FontAwesomeIcon icon={faCalendarAlt} style={styles.metaIcon} />
+                        <span style={styles.metaLabel}>Valida fino al:</span>
+                        <span style={styles.metaValue}>
+                          {new Date(cert.validUntil).toLocaleDateString('it-IT', { 
+                            day: 'numeric', 
+                            month: 'long', 
+                            year: 'numeric' 
+                          })}
+                        </span>
                       </div>
                     </div>
-                  </Col>
-                </Row>
-              </Carousel.Item>
+                  </div>
+                </Col>
+              </Row>
+            </div>
+          ))}
+          
+          {/* Indicatori carosello migliorati */}
+          <div style={styles.carouselIndicator}>
+            {certifications.map((cert, index) => (
+              <span 
+                key={cert.id}
+                style={{
+                  ...styles.indicator,
+                  ...(index === activeIndex ? styles.activeIndicator : {})
+                }}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Vai alla certificazione ${cert.name}`}
+              />
             ))}
-          </Carousel>
+          </div>
         </div>
       </Container>
     </div>

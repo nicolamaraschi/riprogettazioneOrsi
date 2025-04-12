@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faMapMarkerAlt, faFlask, faBuilding } from '@fortawesome/free-solid-svg-icons';
 
 // Importazione dell'immagine
-import graficoImg from '../../assets/images/grafico.png';
+import graficoImg from '../../assets/images/cosmesy.webp';
 
 const NewsSection = () => {
   // Stili inline

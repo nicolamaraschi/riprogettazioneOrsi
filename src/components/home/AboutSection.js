@@ -14,8 +14,20 @@ import companyVideo from '../../assets/video/video.mp4';
 const AboutSection = () => {
   const { t } = useTranslation();
   const videoRef = useRef(null);
+  const progressBarRef = useRef(null);
+  const progressContainerRef = useRef(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoDuration, setVideoDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [hoveredValue, setHoveredValue] = useState(null);
+
+  // Stato per l'effetto hover
+  const [hoveredCard, setHoveredCard] = useState(null);
+  const [playButtonHovered, setPlayButtonHovered] = useState(false);
+  const [pauseButtonHovered, setPauseButtonHovered] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(false);
 
   // Stili inline
   const styles = {
@@ -99,6 +111,27 @@ const AboutSection = () => {
       border: '3px solid rgba(255, 255, 255, 0.8)',
       boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)'
     },
+    pauseButton: {
+      position: 'absolute',
+      right: '20px',
+      bottom: '70px',
+      width: '50px',
+      height: '50px',
+      borderRadius: '50%',
+      backgroundColor: 'rgba(226, 183, 126, 0.9)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      cursor: 'pointer',
+      transition: 'transform 0.3s ease, background-color 0.3s ease',
+      border: '3px solid rgba(255, 255, 255, 0.8)',
+      boxShadow: '0 10px 20px rgba(0, 0, 0, 0.3)',
+      zIndex: 10
+    },
+    pauseButtonHover: {
+      transform: 'scale(1.1)',
+      backgroundColor: 'rgba(226, 183, 126, 1)'
+    },
     playButtonHover: {
       transform: 'scale(1.1)',
       backgroundColor: 'rgba(226, 183, 126, 1)'
@@ -110,6 +143,18 @@ const AboutSection = () => {
       borderBottom: '15px solid transparent',
       borderLeft: '25px solid white',
       marginLeft: '8px'
+    },
+    pauseIcon: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    pauseBar: {
+      width: '6px',
+      height: '20px',
+      backgroundColor: 'white',
+      margin: '0 3px',
+      borderRadius: '2px'
     },
     video: {
       width: '100%',
@@ -219,14 +264,101 @@ const AboutSection = () => {
     highlightText: {
       color: '#e2b77e',
       fontWeight: '500'
+    },
+    // Controlli video
+    videoControls: {
+      position: 'absolute',
+      bottom: '0',
+      left: '0',
+      width: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      padding: '10px',
+      display: 'flex',
+      alignItems: 'center',
+      opacity: '0',
+      transition: 'opacity 0.3s ease',
+    },
+    videoControlsVisible: {
+      opacity: '1',
+    },
+    progressContainer: {
+      flex: '1',
+      height: '8px',
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      position: 'relative',
+      marginRight: '15px',
+    },
+    progressBar: {
+      height: '100%',
+      backgroundColor: '#e2b77e',
+      borderRadius: '4px',
+      position: 'absolute',
+      top: '0',
+      left: '0',
+      width: '0%',
+      transition: 'width 0.1s linear',
+    },
+    progressHover: {
+      position: 'absolute',
+      top: '-25px',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      color: 'white',
+      padding: '4px 8px',
+      borderRadius: '4px',
+      fontSize: '12px',
+      display: 'none',
+    },
+    progressHoverVisible: {
+      display: 'block',
+    },
+    timeDisplay: {
+      color: 'white',
+      fontSize: '14px',
+      fontFamily: 'monospace',
     }
   };
 
-  // Stato per l'effetto hover
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [playButtonHovered, setPlayButtonHovered] = useState(false);
+  // Funzione per formattare il tempo in mm:ss
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${mins}:${secs}`;
+  };
 
-  // Funzione per gestire il play/pause del video
+  // Aggiorna la barra di progresso durante la riproduzione del video
+  useEffect(() => {
+    const video = videoRef.current;
+    
+    if (!video) return;
+    
+    const updateProgress = () => {
+      if (!isDragging) {
+        const percentage = (video.currentTime / video.duration) * 100;
+        if (progressBarRef.current) {
+          progressBarRef.current.style.width = `${percentage}%`;
+        }
+        setCurrentTime(video.currentTime);
+      }
+    };
+    
+    const handleMetadata = () => {
+      setVideoDuration(video.duration);
+      setVideoLoaded(true);
+    };
+    
+    video.addEventListener('timeupdate', updateProgress);
+    video.addEventListener('loadedmetadata', handleMetadata);
+    
+    return () => {
+      video.removeEventListener('timeupdate', updateProgress);
+      video.removeEventListener('loadedmetadata', handleMetadata);
+    };
+  }, [isDragging]);
+
+  // Gestione del play/pause del video
   const toggleVideo = () => {
     if (videoRef.current) {
       if (isVideoPlaying) {
@@ -237,6 +369,53 @@ const AboutSection = () => {
         });
       }
     }
+  };
+
+  // Gestione dello scrubbing del video
+  const handleProgressClick = (e) => {
+    if (!progressContainerRef.current || !videoRef.current) return;
+    
+    const rect = progressContainerRef.current.getBoundingClientRect();
+    const position = (e.clientX - rect.left) / rect.width;
+    
+    videoRef.current.currentTime = position * videoRef.current.duration;
+    
+    if (progressBarRef.current) {
+      progressBarRef.current.style.width = `${position * 100}%`;
+    }
+  };
+
+  // Gestione del trascinamento della progress bar
+  const handleProgressMouseDown = (e) => {
+    setIsDragging(true);
+    handleProgressClick(e);
+    
+    const handleMouseMove = (e) => {
+      handleProgressClick(e);
+    };
+    
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+    
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
+
+  // Gestione dell'hover sulla barra di progresso
+  const handleProgressHover = (e) => {
+    if (!progressContainerRef.current || !videoRef.current) return;
+    
+    const rect = progressContainerRef.current.getBoundingClientRect();
+    const position = (e.clientX - rect.left) / rect.width;
+    const timeAtPosition = position * videoRef.current.duration;
+    
+    setHoveredValue({
+      time: formatTime(timeAtPosition),
+      position: e.clientX - rect.left,
+    });
   };
 
   // Effetto per rilevare quando il video è in pausa o in riproduzione
@@ -263,6 +442,7 @@ const AboutSection = () => {
     };
   }, []);
 
+  // Dati per i valori aziendali
   const valuesData = [
     {
       id: 1,
@@ -299,13 +479,18 @@ const AboutSection = () => {
           <div style={styles.titleDecoration}></div>
         </h2>
         
-        {/* Video Presentazione */}
-        <div style={styles.videoContainer} onClick={toggleVideo}>
+        {/* Video Presentazione con controlli personalizzati */}
+        <div 
+          style={styles.videoContainer} 
+          onMouseEnter={() => setControlsVisible(true)}
+          onMouseLeave={() => setControlsVisible(false)}
+        >
           <video 
             ref={videoRef}
             style={styles.video}
             poster="../../assets/images/video-poster.jpg"
             preload="auto"
+            onClick={toggleVideo}
           >
             <source src={companyVideo} type="video/mp4" />
             Il tuo browser non supporta i video HTML5.
@@ -319,7 +504,7 @@ const AboutSection = () => {
           )}
           
           {!isVideoPlaying && videoLoaded && (
-            <div style={styles.videoOverlay}>
+            <div style={styles.videoOverlay} onClick={toggleVideo}>
               <div 
                 style={{
                   ...styles.playButton,
@@ -332,6 +517,63 @@ const AboutSection = () => {
               </div>
             </div>
           )}
+          
+          {/* Pulsante Pausa (visibile solo quando il video è in riproduzione) */}
+          {isVideoPlaying && (
+            <div 
+              style={{
+                ...styles.pauseButton,
+                ...(pauseButtonHovered ? styles.pauseButtonHover : {}),
+                opacity: controlsVisible ? 1 : 0
+              }}
+              onClick={toggleVideo}
+              onMouseEnter={() => setPauseButtonHovered(true)}
+              onMouseLeave={() => setPauseButtonHovered(false)}
+            >
+              <div style={styles.pauseIcon}>
+                <div style={styles.pauseBar}></div>
+                <div style={styles.pauseBar}></div>
+              </div>
+            </div>
+          )}
+          
+          {/* Controlli video personalizzati */}
+          <div 
+            style={{
+              ...styles.videoControls,
+              ...(controlsVisible || isVideoPlaying ? styles.videoControlsVisible : {})
+            }}
+          >
+            <div 
+              ref={progressContainerRef}
+              style={styles.progressContainer}
+              onClick={handleProgressClick}
+              onMouseDown={handleProgressMouseDown}
+              onMouseMove={handleProgressHover}
+              onMouseLeave={() => setHoveredValue(null)}
+            >
+              <div 
+                ref={progressBarRef}
+                style={styles.progressBar}
+              ></div>
+              
+              {hoveredValue && (
+                <div 
+                  style={{
+                    ...styles.progressHover,
+                    ...styles.progressHoverVisible,
+                    left: `${hoveredValue.position}px`
+                  }}
+                >
+                  {hoveredValue.time}
+                </div>
+              )}
+            </div>
+            
+            <div style={styles.timeDisplay}>
+              {formatTime(currentTime)} / {formatTime(videoDuration)}
+            </div>
+          </div>
         </div>
         <p style={styles.videoCaption}>
           Scopri la storia e i valori di ORSI: tradizione italiana dal 1907

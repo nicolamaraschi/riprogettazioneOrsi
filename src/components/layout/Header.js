@@ -1,5 +1,5 @@
 // src/components/layout/Header.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
@@ -12,11 +12,8 @@ import ukFlag from '../../assets/images/united-kingdom-flag-icon.png';
 import franceFlag from '../../assets/images/france-flag-icon.png';
 import germanyFlag from '../../assets/images/germany-flag-icon.png';
 
-// Devi importare Font Awesome se non l'hai già fatto
-// import '@fortawesome/fontawesome-free/css/all.min.css';
-
 const Header = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,8 +22,32 @@ const Header = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
+  
+  // Refs per gestire i click al di fuori del dropdown
+  const desktopLanguageRef = useRef(null);
+  const mobileLanguageRef = useRef(null);
 
   const isHomePage = location.pathname === '/';
+
+  // Get current language
+  const currentLanguage = i18n.language || localStorage.getItem('language') || 'it';
+
+  // Map language codes to flag images
+  const languageFlags = {
+    it: italyFlag,
+    en: ukFlag,
+    fr: franceFlag,
+    de: germanyFlag
+  };
+
+  // Language names mapping
+  const languageNames = {
+    it: 'Italiano',
+    en: 'English',
+    fr: 'Français',
+    de: 'Deutsch'
+  };
 
   // Funzione per recuperare le categorie dal backend
   const fetchCategories = async () => {
@@ -55,8 +76,22 @@ const Header = () => {
 
   // Handle language change
   const changeLanguage = (lng) => {
+    console.log("Changing language to:", lng);
     i18n.changeLanguage(lng);
     localStorage.setItem('language', lng);
+    setLanguageDropdownOpen(false);
+    
+    if (mobileMenuOpen) {
+      setTimeout(() => {
+        setMobileMenuOpen(false);
+      }, 300);
+    }
+  };
+
+  // Toggle language dropdown
+  const toggleLanguageDropdown = (e) => {
+    e.stopPropagation();
+    setLanguageDropdownOpen(!languageDropdownOpen);
   };
 
   // Detect scroll for header styling
@@ -75,35 +110,29 @@ const Header = () => {
 
   // Handle dropdown menu interaction for laptop/desktop
   useEffect(() => {
-    // Gestisce la logica per mantenere aperti i menu durante la navigazione tra essi
     const handleMenuInteraction = () => {
       // Per schermi più grandi di 992px (laptop/desktop)
       if (window.innerWidth > 992) {
         const dropdowns = document.querySelectorAll('.dropdown');
         
         dropdowns.forEach(dropdown => {
-          // Attiva il menu al mouseover
           dropdown.addEventListener('mouseenter', () => {
             dropdown.classList.add('hover-active');
           });
           
-          // Aggiungi un ritardo alla disattivazione
           dropdown.addEventListener('mouseleave', () => {
             setTimeout(() => {
-              // Controlla se il mouse è ancora fuori dall'elemento
               if (!dropdown.matches(':hover')) {
                 dropdown.classList.remove('hover-active');
               }
-            }, 500); // Ritardo di 500ms per dare più tempo
+            }, 500);
           });
         });
         
-        // Gestione specifica per i menu nidificati
         const nestedDropdowns = document.querySelectorAll('.nested-dropdown');
         nestedDropdowns.forEach(nested => {
           nested.addEventListener('mouseenter', () => {
             nested.classList.add('hover-active');
-            // Assicurati che anche il parent dropdown rimanga attivo
             nested.closest('.dropdown').classList.add('hover-active');
           });
           
@@ -111,8 +140,6 @@ const Header = () => {
             setTimeout(() => {
               if (!nested.matches(':hover')) {
                 nested.classList.remove('hover-active');
-                // Non rimuoviamo la classe dal parent dropdown qui
-                // per mantenere aperto il menu principale
               }
             }, 500);
           });
@@ -122,11 +149,9 @@ const Header = () => {
     
     handleMenuInteraction();
     
-    // Aggiungi un event listener per quando la finestra viene ridimensionata
     window.addEventListener('resize', handleMenuInteraction);
     
     return () => {
-      // Rimuovi gli event listener quando il componente si smonta
       window.removeEventListener('resize', handleMenuInteraction);
       
       const dropdowns = document.querySelectorAll('.dropdown, .nested-dropdown');
@@ -157,28 +182,23 @@ const Header = () => {
 
   // Toggle dropdown for mobile view
   const toggleDropdown = (dropdownId, event) => {
-    // Solo per vista mobile (< 992px)
     if (window.innerWidth <= 992) {
-      event.preventDefault(); // Previene il comportamento di default su mobile
+      event.preventDefault();
       if (activeDropdowns.includes(dropdownId)) {
         setActiveDropdowns(activeDropdowns.filter(id => id !== dropdownId));
       } else {
         setActiveDropdowns([...activeDropdowns, dropdownId]);
       }
     }
-    // In vista desktop, lascia che CSS gestisca l'hover
   };
 
   // Funzione per navigare ai prodotti di una sottocategoria
   const navigateToSubcategoryProducts = (categoryId, subcategoryId, categoryName, subcategoryName) => {
-    // Chiudi il menu mobile se aperto
     if (mobileMenuOpen) setMobileMenuOpen(false);
     
-    // Costruisci lo slug per l'URL (opzionale, per URL più descrittivi)
     const categorySlug = categoryName.toLowerCase().replace(/\s+/g, '-');
     const subcategorySlug = subcategoryName.toLowerCase().replace(/\s+/g, '-');
     
-    // Naviga alla pagina dei prodotti con i parametri necessari
     navigate(`/products/${categorySlug}/${subcategorySlug}`, {
       state: {
         categoryId,
@@ -189,25 +209,47 @@ const Header = () => {
     });
   };
 
-  // Get current language
-  const currentLanguage = i18n.language || localStorage.getItem('language') || 'it';
-
-  // Stili CSS inline specifici per risolvere il problema del dropdown
-  const styles = {
-    dropdownMenuStyles: {
-      display: 'block',
-      transition: 'opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease',
-      transitionDelay: '0.1s', // Ritardo nella transizione
-    }
-  };
-
-  // Aggiungiamo CSS dinamico per gestire i menu hover
+  // Close language dropdown when clicking outside
   useEffect(() => {
-    // Crea e applica stili CSS dinamici
+    const handleClickOutside = (event) => {
+      // Chiudi il dropdown se è aperto e il click è al di fuori
+      if (languageDropdownOpen) {
+        // Verifica se il click è dentro o fuori il dropdown desktop
+        const isDesktopOutside = desktopLanguageRef.current && 
+                                !desktopLanguageRef.current.contains(event.target);
+        
+        // Verifica se il click è dentro o fuori il dropdown mobile
+        const isMobileOutside = mobileLanguageRef.current && 
+                               !mobileLanguageRef.current.contains(event.target);
+        
+        // Se siamo in modalità desktop e il click è fuori dal dropdown desktop
+        if (window.innerWidth > 992 && isDesktopOutside) {
+          setLanguageDropdownOpen(false);
+        } 
+        // Se siamo in modalità mobile e il click è fuori dal dropdown mobile
+        else if (window.innerWidth <= 992 && isMobileOutside) {
+          setLanguageDropdownOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [languageDropdownOpen]);
+
+  // Chiudi dropdown lingua quando cambia la posizione
+  useEffect(() => {
+    setLanguageDropdownOpen(false);
+  }, [location.pathname, location.hash]);
+
+  // Inserisci CSS globale per la navbar e le bandiere
+  useEffect(() => {
     const styleSheet = document.createElement('style');
     styleSheet.type = 'text/css';
     styleSheet.innerHTML = `
-      /* Stili per i menu dropdown in modalità laptop */
+      /* Stili per i menu dropdown */
       @media (min-width: 993px) {
         .hover-active > .dropdown-menu {
           opacity: 1 !important;
@@ -223,7 +265,6 @@ const Header = () => {
           pointer-events: auto !important;
         }
         
-        /* Aggiungi zone sicure per il mouse */
         .dropdown-menu::before {
           content: '';
           position: absolute;
@@ -243,17 +284,339 @@ const Header = () => {
           height: 100%;
           background: transparent;
         }
+        
+        /* Nascondi l'elemento lingua mobile su desktop */
+        .mobile-language-item {
+          display: none !important;
+        }
+      }
+      
+      /* Stili per le bandiere */
+      .language-flag {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        border: 2px solid transparent;
+        position: relative;
+      }
+      
+      .language-flag.active {
+        border-color: #0056b3;
+      }
+      
+      .language-flag img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      /* Desktop language dropdown styling */
+      .desktop-language-container {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 15px;
+        position: relative;
+      }
+      
+      .language-button {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 5px;
+      }
+      
+      .arrow-down {
+        margin-left: 5px;
+        font-size: 10px;
+        color: #666;
+      }
+      
+      /* Language dropdown */
+      .language-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        padding: 10px;
+        z-index: 1000;
+        min-width: 150px;
+        margin-top: 10px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+      }
+      
+      .language-dropdown.open {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+      
+      .language-option {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+      
+      .language-option:hover {
+        background-color: #f0f0f0;
+      }
+      
+      .language-option.active {
+        background-color: #f0f7ff;
+        font-weight: bold;
+      }
+      
+      .language-name {
+        font-size: 14px;
+        color: #333;
+      }
+      
+      /* Mobile styles */
+      @media (max-width: 992px) {
+        /* Mobile navbar styling */
+        .nav-section {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 20px 0;
+        }
+        
+        .nav-menu {
+          width: 100%;
+          max-width: 400px;
+          margin: 0 auto;
+          padding: 0;
+        }
+        
+        .nav-item {
+          margin: 5px 0;
+          width: 100%;
+        }
+        
+        .nav-link {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 12px 15px;
+          font-size: 16px;
+        }
+        
+        /* Nascondi il selettore lingua desktop */
+        .desktop-language-container {
+          display: none !important;
+        }
+        
+        /* Mostra l'elemento lingua mobile */
+        .mobile-language-item {
+          display: block !important;
+          width: 80%;
+          max-width: 300px;
+          margin: 10px auto;
+        }
+        
+        .mobile-language-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          padding: 12px 15px;
+          background-color: rgba(0,86,179,0.1);
+          color: #0056b3;
+          border-radius: 8px;
+          border: none;
+          font-size: 16px;
+          cursor: pointer;
+        }
+        
+        .globe-icon {
+          margin-right: 8px;
+        }
+        
+        /* Mobile language dropdown */
+        .mobile-language-dropdown {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: white;
+          border-radius: 12px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+          padding: 20px;
+          z-index: 1050;
+          width: 85%;
+          max-width: 320px;
+        }
+        
+        .mobile-dropdown-title {
+          font-size: 18px;
+          font-weight: bold;
+          margin-bottom: 15px;
+          padding-bottom: 10px;
+          border-bottom: 1px solid #eee;
+          text-align: center;
+          color: #333;
+        }
+        
+        .close-button {
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          background: none;
+          border: none;
+          font-size: 20px;
+          color: #999;
+          cursor: pointer;
+        }
+        
+        .mobile-language-options {
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .mobile-language-option {
+          display: flex;
+          align-items: center;
+          padding: 12px;
+          margin: 5px 0;
+          border-radius: 8px;
+          cursor: pointer;
+        }
+        
+        .mobile-language-option:hover {
+          background-color: #f5f5f5;
+        }
+        
+        .mobile-language-option.active {
+          background-color: #f0f7ff;
+          font-weight: bold;
+        }
+        
+        /* Overlay */
+        .mobile-overlay {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0;
+          background-color: rgba(0,0,0,0.5);
+          z-index: 1040;
+        }
+      }
+      
+      /* Debug styling */
+      .lang-debug-info {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.7);
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 12px;
+        z-index: 9999;
       }
     `;
     document.head.appendChild(styleSheet);
     
     return () => {
-      // Rimuovi gli stili quando il componente viene smontato
       if (styleSheet.parentNode) {
         styleSheet.parentNode.removeChild(styleSheet);
       }
     };
   }, []);
+
+  // Render del selettore di lingua desktop
+  const renderDesktopLanguageSelector = () => (
+    <div className="desktop-language-container" ref={desktopLanguageRef}>
+      <button 
+        className="language-button"
+        onClick={toggleLanguageDropdown}
+        aria-label="Cambia lingua"
+      >
+        <div className={`language-flag ${currentLanguage === currentLanguage ? 'active' : ''}`}>
+          <img src={languageFlags[currentLanguage]} alt={languageNames[currentLanguage]} />
+        </div>
+        <span className="arrow-down">▼</span>
+      </button>
+      
+      {languageDropdownOpen && (
+        <div className="language-dropdown open">
+          {Object.keys(languageFlags).map(lang => (
+            <div 
+              key={lang}
+              className={`language-option ${currentLanguage === lang ? 'active' : ''}`}
+              onClick={() => changeLanguage(lang)}
+            >
+              <div className="language-flag">
+                <img src={languageFlags[lang]} alt={languageNames[lang]} />
+              </div>
+              <span className="language-name">{languageNames[lang]}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // Render del selettore di lingua mobile
+  const renderMobileLanguageSelector = () => (
+    <div className="mobile-language-item" ref={mobileLanguageRef}>
+      <button 
+        className="mobile-language-button"
+        onClick={toggleLanguageDropdown}
+      >
+        <i className="fas fa-globe globe-icon"></i>
+        <span>{languageNames[currentLanguage]}</span>
+      </button>
+      
+      {languageDropdownOpen && (
+        <>
+          <div className="mobile-overlay" onClick={() => setLanguageDropdownOpen(false)}></div>
+          <div className="mobile-language-dropdown">
+            <div className="mobile-dropdown-title">
+              Seleziona lingua
+              <button 
+                className="close-button"
+                onClick={() => setLanguageDropdownOpen(false)}
+                aria-label="Chiudi"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="mobile-language-options">
+              {Object.keys(languageFlags).map(lang => (
+                <div 
+                  key={lang}
+                  className={`mobile-language-option ${currentLanguage === lang ? 'active' : ''}`}
+                  onClick={() => changeLanguage(lang)}
+                >
+                  <div className="language-flag">
+                    <img src={languageFlags[lang]} alt={languageNames[lang]} />
+                  </div>
+                  <span className="language-name">{languageNames[lang]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <header className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
@@ -351,18 +714,17 @@ const Header = () => {
               </Link>
             </li>
             
-            {/* Products Dropdown - Modificato per usare i dati delle API */}
+            {/* Products Dropdown */}
             <li className={`nav-item dropdown ${activeDropdowns.includes('products') ? 'open' : ''}`}>
               <div className="nav-link dropdown-toggle" onClick={(e) => toggleDropdown('products', e)}>
                 <i className="fas fa-box-open"></i> {t('prodotti')}
               </div>
-              <div className="dropdown-menu" style={styles.dropdownMenuStyles}>
+              <div className="dropdown-menu">
                 {loading ? (
                   <div className="dropdown-item">Caricamento categorie...</div>
                 ) : error ? (
                   <div className="dropdown-item text-danger">Errore: {error}</div>
                 ) : (
-                  // Renderizza dinamicamente le categorie
                   categories.map(category => (
                     <div 
                       key={category._id} 
@@ -374,7 +736,7 @@ const Header = () => {
                       >
                         <i className="fas fa-briefcase"></i> {category.name}
                       </div>
-                      <div className="dropdown-menu" style={styles.dropdownMenuStyles}>
+                      <div className="dropdown-menu">
                         {category.subcategories && category.subcategories.length > 0 ? (
                           category.subcategories.map(subcategory => (
                             <div
@@ -382,7 +744,7 @@ const Header = () => {
                               className="dropdown-item"
                               onClick={() => navigateToSubcategoryProducts(
                                 category._id,
-                                subcategory._id || subcategory.id, // gestisce entrambe le possibili strutture
+                                subcategory._id || subcategory.id,
                                 category.name,
                                 subcategory.name
                               )}
@@ -419,39 +781,13 @@ const Header = () => {
                 <i className="fas fa-envelope"></i> {t('contatti')}
               </Link>
             </li>
+            
+            {/* Mobile Language Selector */}
+            {renderMobileLanguageSelector()}
           </ul>
           
-          {/* Language Selector */}
-          <div className="language-selector">
-            <button 
-              className={`language-btn ${currentLanguage === 'it' ? 'active' : ''}`} 
-              onClick={() => changeLanguage('it')}
-              aria-label="Italian"
-            >
-              <img src={italyFlag} alt="Italiano" />
-            </button>
-            <button 
-              className={`language-btn ${currentLanguage === 'en' ? 'active' : ''}`} 
-              onClick={() => changeLanguage('en')}
-              aria-label="English"
-            >
-              <img src={ukFlag} alt="English" />
-            </button>
-            <button 
-              className={`language-btn ${currentLanguage === 'fr' ? 'active' : ''}`} 
-              onClick={() => changeLanguage('fr')}
-              aria-label="French"
-            >
-              <img src={franceFlag} alt="Français" />
-            </button>
-            <button 
-              className={`language-btn ${currentLanguage === 'de' ? 'active' : ''}`} 
-              onClick={() => changeLanguage('de')}
-              aria-label="German"
-            >
-              <img src={germanyFlag} alt="Deutsch" />
-            </button>
-          </div>
+          {/* Desktop Language Selector */}
+          {renderDesktopLanguageSelector()}
         </div>
       </div>
     </header>
