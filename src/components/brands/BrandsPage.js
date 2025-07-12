@@ -25,28 +25,28 @@ const BrandsPage = () => {
       id: 1,
       name: 'BIT',
       image: brand1Img,
-      description: 'Linea di prodotti professionali per bucato e lavanderia industriale, caratterizzata da alte prestazioni anche in condizioni difficili.',
+      description: t('bitDescriptionBrandsPage'),
       link: '/products/professional/bit'
     },
     {
       id: 2,
       name: 'Dolomiten Weiss',
       image: brand2Img,
-      description: 'Prodotti premium per il bucato professionale, formulati per garantire igiene e brillantezza nei tessuti ad uso industriale e ospedaliero.',
+      description: t('dolomitenWeissDescriptionBrandsPage'),
       link: '/products/professional/dolomitenweiss'
     },
     {
       id: 3,
       name: 'Orsetto',
       image: brand3Img,
-      description: 'La storica linea domestica di ORSI, amata dalle famiglie italiane per la sua efficacia e delicatezza sui tessuti.',
+      description: t('orsettoDescriptionBrandsPage'),
       link: '/products/domestic/orsetto'
     },
     {
       id: 4,
       name: 'La Suora',
       image: brand4Img,
-      description: 'Specializzata in prodotti per la cura dei tessuti delicati, tende e pizzi, con formulazioni che rispettano le fibre e mantengono la bellezza dei capi.',
+      description: t('laSuoraDescriptionBrandsPage'),
       link: '/products/domestic/suora'
     }
   ];
@@ -388,21 +388,19 @@ const BrandsPage = () => {
           <div style={styles.titleDecoration}></div>
         </h1>
         <p style={styles.brands_page_subtitle}>
-          Dal 1907 ORSI sviluppa marchi innovativi nel settore della detergenza, combinando tradizione, 
-          tecnologia e rispetto per l'ambiente. Ogni nostro brand è pensato per soddisfare esigenze 
-          specifiche, garantendo sempre l'eccellenza che ci contraddistingue.
+          {t('brandsPageSubtitle')}
         </p>
       </div>
       
       {/* Istruzioni per lo scorrimento */}
       <div style={styles.instruction_text}>
         <FontAwesomeIcon icon={faHandPointRight} className="swipe-hint" />
-        <span>Scorri per visualizzare tutti i nostri marchi</span>
+        <span>{t('brandsPageSwipeInstruction')}</span>
         <FontAwesomeIcon icon={faHandPointLeft} className="swipe-hint" style={{transform: 'scaleX(-1)'}} />
       </div>
       
       <div className="carousel-container2 mb-4" style={styles.carousel_container}>
-        <h2 style={styles.carousel_title}>I Nostri Brands</h2>
+        <h2 style={styles.carousel_title}>{t('ourBrandsCarouselTitle')}</h2>
         <div 
           className="carousel2" 
           style={{ 
@@ -498,7 +496,7 @@ const BrandsPage = () => {
                         ...(hoveredCard === brand.id ? styles.brand_button_hover : {})
                       }}
                     >
-                      Scopri i prodotti
+                      {t('discoverProducts')}
                     </Link>
                   </div>
                 </div>
@@ -508,18 +506,13 @@ const BrandsPage = () => {
         </div>
         
         <div style={styles.brand_history}>
-          <h2 style={styles.history_title}>La nostra storia</h2>
+          <h2 style={styles.history_title}>{t('ourHistoryTitle')}</h2>
           <p style={styles.history_text}>
-            Fondata a Bologna nel 1907, ORSI ha attraversato più di un secolo di storia italiana, 
-            evolvendo continuamente i suoi prodotti per rispondere alle esigenze di un mercato in 
-            costante cambiamento. Dalle prime formulazioni di saponi fino alle moderne soluzioni 
-            eco-sostenibili, il nostro impegno per la qualità e l'innovazione è rimasto immutato.
+            {t('ourHistoryText1')}
           </p>
           <br />
           <p style={styles.history_text}>
-            Ogni marca ORSI rappresenta questa evoluzione, combinando la tradizione della nostra 
-            esperienza con l'innovazione delle più moderne tecnologie, per offrire prodotti 
-            efficaci, sicuri e rispettosi dell'ambiente.
+            {t('ourHistoryText2')}
           </p>
         </div>
       </Container>

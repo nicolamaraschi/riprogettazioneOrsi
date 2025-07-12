@@ -21,25 +21,25 @@ const BrandsSection = () => {
       id: 1,
       name: 'BIT',
       image: brand1Img,
-      description: 'Linea professionale per il bucato industriale con performance elevate anche in condizioni difficili'
+      description: t('bitDescription')
     },
     {
       id: 2,
       name: 'Dolomiten Weiss',
       image: brand2Img,
-      description: 'Prodotti premium per bucato professionale con formule studiate per igienizzare a fondo'
+      description: t('dolomitenWeissDescription')
     },
     {
       id: 3,
       name: 'Orsetto',
       image: brand3Img,
-      description: 'La nostra storica linea domestica, amata dalle famiglie italiane per efficacia e delicatezza'
+      description: t('orsettoDescription')
     },
     {
       id: 4,
       name: 'La Suora',
       image: brand4Img,
-      description: 'Specializzata nella cura dei tessuti delicati, tende e pizzi con rispetto delle fibre'
+      description: t('laSuoraDescription')
     }
   ];
 
@@ -344,15 +344,14 @@ buttonHover: {
         <div style={styles.sectionHeader}>
           <h2 style={styles.sectionTitle}>{t('nostriMarchi')}</h2>
           <p style={styles.sectionSubtitle}>
-            Dal 1907 sviluppiamo marchi innovativi nel settore della detergenza, 
-            combinando tradizione, tecnologia e rispetto per l'ambiente
+            {t('brandsSubtitle')}
           </p>
         </div>
         
         {/* Istruzioni per lo scorrimento */}
         <div style={styles.instructionText}>
           <FontAwesomeIcon icon={faHandPointRight} className="swipe-hint" />
-          <span>Scorri o utilizza i controlli per esplorare tutti i nostri marchi</span>
+          <span>{t('swipeInstruction')}</span>
           <FontAwesomeIcon icon={faHandPointLeft} className="swipe-hint" style={{transform: 'scaleX(-1)'}} />
         </div>
         

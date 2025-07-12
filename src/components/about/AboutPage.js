@@ -15,52 +15,47 @@ const AboutPage = () => {
   return (
     <Container fluid className="p-0">
       <div className="our-menu-food">
-        <h2 style={{ color: 'white', textAlign: 'center' }}>CHI SIAMO</h2>
-        <p className="ecologia-text">
-          Nata a Bologna nel 1907<br />
-          ORSI è una delle poche realtà italiane di rilievo nel mercato della detergenza in polvere domestica ed istituzionale<br />
-          Competendo per esperienza, tecnologia e qualità con le aziende leader del settore.<br /> 
-          Oggi, ORSI investe in Ricerca e Sviluppo per innovare nel campo della detergenza e della cosmesi.
-        </p>
+        <h2 style={{ color: 'white', textAlign: 'center' }}>{t('chiSiamo2')}</h2>
+        <p className="ecologia-text" dangerouslySetInnerHTML={{ __html: t('chiSiamo3') }} />
         
-        <h3 style={{ color: 'white', textAlign: 'center' }}>Con l'impegno che</h3>
+        <h3 style={{ color: 'white', textAlign: 'center' }}>{t('chiSiamo4')}</h3>
         <div className="main-menu-food">
           <div className="inner-menu-food">
             <div className="menu-food-content">
-              <img src={responsabileImg} alt="Innovazione Responsabile" />
+              <img src={responsabileImg} alt={t('titoloSostenibile1')} />
               <div className="menu-food-text">
-                <h3>Innovazione Responsabile</h3>
-                <p className="description">L'innovazione responsabile è la chiave per un progresso sostenibile e duraturo.</p>
+                <h3>{t('titoloSostenibile1')}</h3>
+                <p className="description">{t('descrizioneSostenibile1')}</p>
               </div>
             </div>
           </div>
           
           <div className="inner-menu-food">
             <div className="menu-food-content">
-              <img src={menu2Img} alt="Approvigionamento Etico" />
+              <img src={menu2Img} alt={t('titoloSostenibile2')} />
               <div className="menu-food-text">
-                <h3>Approvigionamento Etico</h3>
-                <p className="description">Scegliere un approvvigionamento etico è una scelta responsabile per un futuro sostenibile.</p>
+                <h3>{t('titoloSostenibile2')}</h3>
+                <p className="description">{t('descrizioneSostenibile2')}</p>
               </div>
             </div>
           </div>
           
           <div className="inner-menu-food">
             <div className="menu-food-content">
-              <img src={worldEnvironmentImg} alt="Proteggere Il Nostro Ambiente" />
+              <img src={worldEnvironmentImg} alt={t('titoloSostenibile3')} />
               <div className="menu-food-text">
-                <h3>Proteggere il nostro ambiente</h3>
-                <p className="description">Proteggere l'ambiente è proteggere il nostro futuro.</p>
+                <h3>{t('titoloSostenibile3')}</h3>
+                <p className="description">{t('descrizioneSostenibile3')}</p>
               </div>
             </div>
           </div>
           
           <div className="inner-menu-food">
             <div className="menu-food-content">
-              <img src={prendersiCuraImg} alt="Prendersi cura delle persone" />
+              <img src={prendersiCuraImg} alt={t('titoloSostenibile4')} />
               <div className="menu-food-text">
-                <h3>Prendersi cura delle persone</h3>
-                <p className="description">Cura dedicata al benessere di tutti.</p>
+                <h3>{t('titoloSostenibile4')}</h3>
+                <p className="description">{t('descrizioneSostenibile4')}</p>
               </div>
             </div>
           </div>

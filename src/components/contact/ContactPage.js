@@ -365,39 +365,39 @@ const ContactPage = () => {
     {
       id: 'company',
       icon: faBuilding,
-      title: 'Informazioni Aziendali',
+      title: t('companyInfoTitle'),
       details: [
-        { label: 'Azienda', value: 'Orsi S.R.L.' },
-        { label: 'P.IVA', value: 'IT 00829301209' },
-        { label: 'REA', value: 'BO 367676' },
-        { label: 'C.F.', value: '01995970363' }
+        { label: t('companyLabel'), value: 'Orsi S.R.L.' },
+        { label: t('vatNumberLabel'), value: 'IT 00829301209' },
+        { label: t('reaLabel'), value: 'BO 367676' },
+        { label: t('cfLabel'), value: '01995970363' }
       ]
     },
     {
       id: 'address',
       icon: faMapMarkerAlt,
-      title: 'Sede Legale',
+      title: t('legalAddressTitle'),
       details: [
-        { label: 'Indirizzo', value: 'Via C. Bassi 22, 40015 Galliera (BO), Italia' }
+        { label: t('addressLabel'), value: 'Via C. Bassi 22, 40015 Galliera (BO), Italia' }
       ]
     },
     {
       id: 'contact',
       icon: faPhone,
-      title: 'Contatti Diretti',
+      title: t('directContactsTitle'),
       details: [
         { 
-          label: 'Telefono', 
+          label: t('phoneLabel'), 
           value: '+39 051 6671000', 
           link: 'tel:+390516671000' 
         },
         { 
-          label: 'Email', 
+          label: t('emailLabel'), 
           value: 'info@orsidetersivi.com', 
           link: 'mailto:info@orsidetersivi.com' 
         },
         { 
-          label: 'PEC', 
+          label: t('pecLabel'), 
           value: 'orsidetersivi@pec.it', 
           link: 'mailto:orsidetersivi@pec.it' 
         }
@@ -406,11 +406,11 @@ const ContactPage = () => {
     {
       id: 'hours',
       icon: faClock,
-      title: 'Orari Ufficio',
+      title: t('officeHoursTitle'),
       details: [
-        { label: 'Lun-Ven', value: '9:00 - 18:00' },
-        { label: 'Sabato', value: 'Chiuso' },
-        { label: 'Domenica', value: 'Chiuso' }
+        { label: t('monFriLabel'), value: '9:00 - 18:00' },
+        { label: t('saturdayLabel'), value: t('closed') },
+        { label: t('sundayLabel'), value: t('closed') }
       ]
     }
   ];
@@ -431,8 +431,7 @@ const ContactPage = () => {
             <div style={styles.titleDecoration}></div>
           </h1>
           <p style={styles.pageSubtitle}>
-            Siamo qui per rispondere a qualsiasi domanda sui nostri prodotti e servizi.
-            Non esitate a contattarci per ulteriori informazioni.
+            {t('contactPageSubtitle')}
           </p>
         </div>
         
@@ -491,10 +490,10 @@ const ContactPage = () => {
                 />
                 <Marker position={position}>
                   <Popup>
-                    <strong>Orsi S.R.L.</strong><br />
-                    Via C. Bassi 22<br />
-                    40015 Galliera (BO)<br />
-                    Italia
+                    <strong>{t('companyName')}</strong><br />
+                    {t('companyAddress1')}<br />
+                    {t('companyAddress2')}<br />
+                    {t('companyAddress3')}
                   </Popup>
                 </Marker>
               </MapContainer>
@@ -512,7 +511,7 @@ const ContactPage = () => {
                 
                 {formStatus === 'success' && (
                   <div style={styles.successAlert}>
-                    Grazie per averci contattato! Il tuo messaggio è stato inviato con successo.
+                    {t('formSuccessMessage')}
                   </div>
                 )}
                 

@@ -20,7 +20,7 @@ const CertificationsPage = () => {
       id: 1,
       name: 'Bureau Veritas',
       image: bureauVeritasImg,
-      description: 'La certificazione Bureau Veritas garantisce che i nostri processi e prodotti soddisfano gli standard internazionali di qualità. Questo riconoscimento testimonia il nostro impegno nella produzione di detergenti che rispettano la salute umana e l\'ambiente.',
+      description: t('bureauVeritasDescriptionCertPage'),
       issuedDate: '2021-06-15',
       validUntil: '2024-06-14'
     },
@@ -28,7 +28,7 @@ const CertificationsPage = () => {
       id: 2,
       name: 'Certificazione Biologica',
       image: certificatoBiologicoImg,
-      description: 'I nostri prodotti biologici sono certificati secondo gli standard europei per garantire l\'utilizzo di ingredienti naturali e processi produttivi sostenibili, rispettosi dell\'ambiente e della biodiversità.',
+      description: t('organicCertificationDescriptionCertPage'),
       issuedDate: '2022-03-10',
       validUntil: '2025-03-09'
     }
@@ -359,15 +359,14 @@ const CertificationsPage = () => {
             <div style={styles.titleDecoration}></div>
           </h1>
           <p className="certifications-subtitle">
-            Le nostre certificazioni testimoniano il nostro impegno verso la qualità, la sostenibilità e l'innovazione responsabile. 
-            Lavoriamo costantemente per mantenere e migliorare gli standard più elevati in tutti i nostri processi.
+            {t('certificationsPageSubtitle')}
           </p>
         </div>
         
         {/* Istruzioni per lo scorrimento */}
         <div style={styles.instructionText}>
           <FontAwesomeIcon icon={faHandPointRight} className="swipe-hint" />
-          <span>Scorri per visualizzare tutte le nostre certificazioni</span>
+          <span>{t('certificationsSwipeInstruction')}</span>
           <FontAwesomeIcon icon={faHandPointLeft} className="swipe-hint" style={{transform: 'scaleX(-1)'}} />
         </div>
         
@@ -433,22 +432,22 @@ const CertificationsPage = () => {
                         <ul style={styles.benefits}>
                           <li style={styles.benefitItem}>
                             <FontAwesomeIcon icon={faCheckCircle} style={styles.benefitIcon} />
-                            <span style={styles.benefitText}>Conformità agli standard internazionali più rigorosi</span>
+                            <span style={styles.benefitText}>{t('certBenefit1')}</span>
                           </li>
                           <li style={styles.benefitItem}>
                             <FontAwesomeIcon icon={faCheckCircle} style={styles.benefitIcon} />
-                            <span style={styles.benefitText}>Processi produttivi verificati e controllati</span>
+                            <span style={styles.benefitText}>{t('certBenefit2')}</span>
                           </li>
                           <li style={styles.benefitItem}>
                             <FontAwesomeIcon icon={faCheckCircle} style={styles.benefitIcon} />
-                            <span style={styles.benefitText}>Garanzia di qualità per i nostri clienti</span>
+                            <span style={styles.benefitText}>{t('certBenefit3')}</span>
                           </li>
                         </ul>
                       </div>
                       
                       <div style={styles.metaInfo}>
                         <FontAwesomeIcon icon={faCalendarAlt} style={styles.metaIcon} />
-                        <span style={styles.metaLabel}>Valida fino al:</span>
+                        <span style={styles.metaLabel}>{t('validUntil')}:</span>
                         <span style={styles.metaValue}>
                           {new Date(cert.validUntil).toLocaleDateString('it-IT', { 
                             day: 'numeric', 
@@ -481,38 +480,34 @@ const CertificationsPage = () => {
         </div>
         
         <div style={styles.certificationInfo}>
-          <h2 style={styles.infoTitle}>Il nostro impegno per la qualità</h2>
+          <h2 style={styles.infoTitle}>{t('ourCommitmentToQualityTitle')}</h2>
           <p style={styles.infoText}>
-            In Orsi S.R.L., la qualità e la sostenibilità sono al centro del nostro modello di business. 
-            Le certificazioni che abbiamo ottenuto non sono semplici documenti, ma rappresentano la nostra filosofia aziendale 
-            e il nostro impegno quotidiano verso i clienti e l'ambiente.
+            {t('ourCommitmentToQualityText')}
           </p>
           
           <ul style={styles.benefits}>
             <li style={styles.benefitItem}>
               <FontAwesomeIcon icon={faCheckCircle} style={styles.benefitIcon} />
-              <strong>Sistema di Gestione della Qualità</strong> - Applichiamo rigorosi controlli in ogni fase della produzione per garantire prodotti di eccellenza.
+              <strong>{t('qualityManagementSystemTitle')}</strong> - {t('qualityManagementSystemText')}
             </li>
             <li style={styles.benefitItem}>
               <FontAwesomeIcon icon={faLeaf} style={styles.benefitIcon} />
-              <strong>Sostenibilità Ambientale</strong> - Utilizziamo processi produttivi a basso impatto ambientale e lavoriamo per ridurre costantemente la nostra impronta ecologica.
+              <strong>{t('environmentalSustainabilityTitle')}</strong> - {t('environmentalSustainabilityText')}
             </li>
             <li style={styles.benefitItem}>
               <FontAwesomeIcon icon={faShieldAlt} style={styles.benefitIcon} />
-              <strong>Innovazione Continua</strong> - Investiamo nella ricerca e sviluppo per migliorare costantemente le formule dei nostri prodotti, rendendoli più efficaci e più sostenibili.
+              <strong>{t('continuousInnovationTitle')}</strong> - {t('continuousInnovationText')}
             </li>
             <li style={styles.benefitItem}>
               <FontAwesomeIcon icon={faAward} style={styles.benefitIcon} />
-              <strong>Trasparenza</strong> - Comunichiamo in modo chiaro e completo la composizione dei nostri prodotti, perché crediamo che i consumatori abbiano diritto a informazioni accurate.
+              <strong>{t('transparencyTitle')}</strong> - {t('transparencyText')}
             </li>
           </ul>
           
           <div className="quality-policy">
-            <h3 className="quality-policy-title">La nostra politica di qualità</h3>
+            <h3 className="quality-policy-title">{t('ourQualityPolicyTitle')}</h3>
             <p className="quality-policy-text">
-              "Ci impegniamo a sviluppare, produrre e distribuire detergenti innovativi che soddisfino le esigenze dei nostri clienti, 
-              rispettando sempre l'ambiente e contribuendo a un futuro più sostenibile. La nostra azienda, nata a Bologna nel 1907, 
-              continua a evolvere mantenendo saldi i principi di eccellenza e responsabilità che ci hanno sempre contraddistinto."
+              {t('ourQualityPolicyText')}
             </p>
           </div>
         </div>

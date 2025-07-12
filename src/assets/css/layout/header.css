@@ -70,17 +70,15 @@
 .nav-section {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   flex-grow: 1;
 }
 
 .nav-menu {
   display: flex;
   list-style: none;
-  margin: 0;
+  margin: 0 auto; /* Center the menu */
   padding: 0;
-  justify-content: flex-start;
-  width: 100%;
+  justify-content: center;
 }
 
 .nav-item {

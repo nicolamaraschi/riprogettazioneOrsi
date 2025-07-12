@@ -206,29 +206,29 @@ const ProductionSection = () => {
       id: 1,
       icon: faIndustry,
       number: "4",
-      title: "Tonnellate/ora",
-      description: "Capacità produttiva del nostro impianto all'avanguardia"
+      title: t('productionStat1Title'),
+      description: t('productionStat1Description')
     },
     {
       id: 2,
       icon: faCogs,
       number: "100%",
-      title: "Automatizzato",
-      description: "Processo di produzione e pallettizzazione robotizzato"
+      title: t('productionStat2Title'),
+      description: t('productionStat2Description')
     },
     {
       id: 3,
       icon: faFlask,
       number: "+50",
-      title: "Analisi/giorno",
-      description: "Test di laboratorio per garantire qualità costante"
+      title: t('productionStat3Title'),
+      description: t('productionStat3Description')
     },
     {
       id: 4,
       icon: faCheckSquare,
       number: "99.8%",
-      title: "Precisione",
-      description: "Nelle verifiche di conformità e controllo qualità"
+      title: t('productionStat4Title'),
+      description: t('productionStat4Description')
     }
   ];
 
@@ -237,22 +237,22 @@ const ProductionSection = () => {
     {
       id: 1,
       step: "1",
-      title: "Formulazione",
-      description: "Sviluppo delle ricette con i nostri chimici altamente specializzati per garantire prodotti innovativi ed efficaci.",
+      title: t('processStep1Title'),
+      description: t('processStep1Description'),
       icon: faVial
     },
     {
       id: 2,
       step: "2",
-      title: "Miscelazione",
-      description: "Integrazione dei componenti con precisione e accuratezza utilizzando tecnologie avanzate di dosaggio.",
+      title: t('processStep2Title'),
+      description: t('processStep2Description'),
       icon: faCogs
     },
     {
       id: 3,
       step: "3",
-      title: "Controllo qualità",
-      description: "Analisi chimiche e test di performance sui prodotti per assicurare il rispetto degli standard più elevati.",
+      title: t('processStep3Title'),
+      description: t('processStep3Description'),
       icon: faFlask
     }
   ];
@@ -262,22 +262,22 @@ const ProductionSection = () => {
     {
       id: 4,
       step: "4",
-      title: "Confezionamento",
-      description: "Linee automatizzate per un packaging preciso ed efficiente che preserva la qualità del prodotto.",
+      title: t('processStep4Title'),
+      description: t('processStep4Description'),
       icon: faBox
     },
     {
       id: 5,
       step: "5",
-      title: "Pallettizzazione",
-      description: "Sistemi robotizzati per la preparazione delle spedizioni con massima efficienza e sicurezza.",
+      title: t('processStep5Title'),
+      description: t('processStep5Description'),
       icon: faCogs
     },
     {
       id: 6,
       step: "6",
-      title: "Distribuzione",
-      description: "Logistica ottimizzata per consegne puntuali in Italia e all'estero con tracciabilità completa.",
+      title: t('processStep6Title'),
+      description: t('processStep6Description'),
       icon: faTruck
     }
   ];
@@ -325,7 +325,7 @@ const ProductionSection = () => {
           <Col lg={6} className="mb-4 mb-lg-0">
             <div style={styles.processContainer}>
               <h3 style={styles.processTitle}>
-                Il nostro processo produttivo
+                {t('ourProductionProcess')}
                 <div style={styles.processTitleUnderline}></div>
               </h3>
               
@@ -352,7 +352,7 @@ const ProductionSection = () => {
           <Col lg={6}>
             <div style={styles.processContainer}>
               <h3 style={styles.processTitle}>
-                Fasi di completamento
+                {t('completionPhases')}
                 <div style={styles.processTitleUnderline}></div>
               </h3>
               

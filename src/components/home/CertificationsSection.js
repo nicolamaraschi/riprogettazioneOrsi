@@ -20,7 +20,7 @@ const CertificationsSection = () => {
       id: 1,
       name: 'Bureau Veritas',
       image: bureauVeritasImg,
-      description: 'La certificazione Bureau Veritas garantisce che i nostri processi e prodotti soddisfano gli standard internazionali di qualità.',
+      description: t('bureauVeritasDescription'),
       issuedDate: '2021-06-15',
       validUntil: '2024-06-14'
     },
@@ -28,7 +28,7 @@ const CertificationsSection = () => {
       id: 2,
       name: 'Certificazione Biologica',
       image: certificatoBiologicoImg,
-      description: 'I nostri prodotti biologici sono certificati secondo gli standard europei per garantire l\'utilizzo di ingredienti naturali e processi produttivi sostenibili.',
+      description: t('organicCertificationDescription'),
       issuedDate: '2022-03-10',
       validUntil: '2025-03-09'
     }
@@ -310,7 +310,7 @@ const CertificationsSection = () => {
         {/* Istruzioni per lo scorrimento */}
         <div style={styles.instructionText}>
           <FontAwesomeIcon icon={faHandPointRight} className="swipe-hint" />
-          <span>Scorri per visualizzare tutte le nostre certificazioni</span>
+          <span>{t('certificationsSwipeInstruction')}</span>
           <FontAwesomeIcon icon={faHandPointLeft} className="swipe-hint" style={{transform: 'scaleX(-1)'}} />
         </div>
         
@@ -376,22 +376,22 @@ const CertificationsSection = () => {
                         <ul style={styles.benefits}>
                           <li style={styles.benefitItem}>
                             <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
-                            <span style={styles.benefitText}>Conformità agli standard internazionali più rigorosi</span>
+                            <span style={styles.benefitText}>{t('certBenefit1')}</span>
                           </li>
                           <li style={styles.benefitItem}>
                             <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
-                            <span style={styles.benefitText}>Processi produttivi verificati e controllati</span>
+                            <span style={styles.benefitText}>{t('certBenefit2')}</span>
                           </li>
                           <li style={styles.benefitItem}>
                             <FontAwesomeIcon icon={faCheck} style={styles.benefitIcon} />
-                            <span style={styles.benefitText}>Garanzia di qualità per i nostri clienti</span>
+                            <span style={styles.benefitText}>{t('certBenefit3')}</span>
                           </li>
                         </ul>
                       </div>
                       
                       <div style={styles.metaInfo}>
                         <FontAwesomeIcon icon={faCalendarAlt} style={styles.metaIcon} />
-                        <span style={styles.metaLabel}>Valida fino al:</span>
+                        <span style={styles.metaLabel}>{t('validUntil')}:</span>
                         <span style={styles.metaValue}>
                           {new Date(cert.validUntil).toLocaleDateString('it-IT', { 
                             day: 'numeric', 

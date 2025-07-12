@@ -77,15 +77,10 @@ const Header = () => {
   // Handle language change
   const changeLanguage = (lng) => {
     console.log("Changing language to:", lng);
-    i18n.changeLanguage(lng);
-    localStorage.setItem('language', lng);
-    setLanguageDropdownOpen(false);
-    
-    if (mobileMenuOpen) {
-      setTimeout(() => {
-        setMobileMenuOpen(false);
-      }, 300);
-    }
+    i18n.changeLanguage(lng).then(() => {
+      localStorage.setItem('language', lng);
+      window.location.reload(); // Ricarica la pagina per applicare la nuova lingua
+    });
   };
 
   // Toggle language dropdown
@@ -393,13 +388,16 @@ const Header = () => {
           flex-direction: column;
           align-items: center;
           padding: 20px 0;
+          justify-content: center; /* Aggiunto per centrare verticalmente */
         }
         
         .nav-menu {
           width: 100%;
           max-width: 400px;
-          margin: 0 auto;
+          margin: 0 auto; /* Modificato per centrare orizzontalmente */
           padding: 0;
+          display: flex; /* Aggiunto per allineare gli elementi */
+          justify-content: center; /* Aggiunto per centrare gli elementi */
         }
         
         .nav-item {
@@ -666,16 +664,6 @@ const Header = () => {
             
             <li className="nav-item">
               <Link 
-                to={isHomePage ? '#section2' : '/#section2'} 
-                className={`nav-link ${location.hash === '#section2' ? 'active' : ''}`}
-                onClick={() => isHomePage ? scrollToSection('section2') : null}
-              >
-                <i className="fas fa-flask"></i> {t('ricerca')}
-              </Link>
-            </li>
-            
-            <li className="nav-item">
-              <Link 
                 to={isHomePage ? '#section3' : '/#section3'} 
                 className={`nav-link ${location.hash === '#section3' ? 'active' : ''}`}
                 onClick={() => isHomePage ? scrollToSection('section3') : null}
@@ -691,16 +679,6 @@ const Header = () => {
                 onClick={() => isHomePage ? scrollToSection('section4') : null}
               >
                 <i className="fas fa-industry"></i> {t('Produzione')}
-              </Link>
-            </li>
-            
-            <li className="nav-item">
-              <Link 
-                to={isHomePage ? '#section5' : '/#section5'} 
-                className={`nav-link ${location.hash === '#section5' ? 'active' : ''}`}
-                onClick={() => isHomePage ? scrollToSection('section5') : null}
-              >
-                <i className="fas fa-newspaper"></i> {t('novita')}
               </Link>
             </li>
             

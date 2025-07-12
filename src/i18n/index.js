@@ -26,10 +26,14 @@ i18n
   .init({
     resources,
     lng: localStorage.getItem('language') || 'it',
+    fallbackLng: 'it', // Aggiunto fallback language
+    debug: true, // Abilita il debug per i18next
     keySeparator: false,
     interpolation: {
       escapeValue: false
     }
   });
+
+console.log("i18n initialized with language:", i18n.language); // Log per debug
 
 export default i18n;

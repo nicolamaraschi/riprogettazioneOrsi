@@ -1,22 +1,16 @@
 // src/components/home/HomePage.js
 import React, { useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowUp } from '@fortawesome/free-solid-svg-icons';
 import ParallaxSection from './ParallaxSection';
 
-// Importa tutti i componenti delle sezioni
 import AboutSection from './AboutSection';
-import ResearchSection from './ResearchSection';
-import ParallaxDivider from './ParallaxDivider'; // Nuovo componente
 import BrandsSection from './BrandsSection';
 import ProductionSection from './ProductionSection';
-import NewsSection from './NewsSection';
 import CertificationsSection from './CertificationsSection';
-import PartnersSection from './PartnersSection';
+
 
 const HomePage = () => {
-  const { t } = useTranslation();
 
   useEffect(() => {
     // Gestione pulsante scroll-to-top
@@ -54,25 +48,14 @@ const HomePage = () => {
       <div id="section1"></div>
       <AboutSection />
       
-      <div id="section2"></div>
-      <ResearchSection />
-      
-      {/* Inseriamo qui il divider parallax */}
-      <ParallaxDivider />
-      
       <div id="section3"></div>
       <BrandsSection />
       
       <div id="section4"></div>
       <ProductionSection />
       
-      <div id="section5"></div>
-      <NewsSection />
-      
       <div id="section6"></div>
       <CertificationsSection />
-      
-      <PartnersSection />
     </>
   );
 };
