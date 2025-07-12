@@ -446,26 +446,26 @@ const AboutSection = () => {
   const valuesData = [
     {
       id: 1,
-      title: "Innovazione Responsabile",
-      description: "L'innovazione responsabile è la chiave per un progresso sostenibile e duraturo.",
+      title: t('titoloSostenibile1'),
+      description: t('descrizioneSostenibile1'),
       image: responsabileImg
     },
     {
       id: 2,
-      title: "Approvvigionamento Etico",
-      description: "Scegliere un approvvigionamento etico è una scelta responsabile per un futuro sostenibile.",
+      title: t('titoloSostenibile2'),
+      description: t('descrizioneSostenibile2'),
       image: menu2Img
     },
     {
       id: 3,
-      title: "Proteggere il nostro ambiente",
-      description: "Proteggere l'ambiente è proteggere il nostro futuro.",
+      title: t('titoloSostenibile3'),
+      description: t('descrizioneSostenibile3'),
       image: worldEnvironmentImg
     },
     {
       id: 4,
-      title: "Prendersi cura delle persone",
-      description: "Cura dedicata al benessere di tutti.",
+      title: t('titoloSostenibile4'),
+      description: t('descrizioneSostenibile4'),
       image: prendersiCuraImg
     }
   ];
@@ -475,7 +475,7 @@ const AboutSection = () => {
       <div style={styles.sectionPattern}></div>
       <Container style={styles.container}>
         <h2 style={styles.mainTitle}>
-          CHI SIAMO
+          {t('chiSiamo2')}
           <div style={styles.titleDecoration}></div>
         </h2>
         
@@ -493,13 +493,13 @@ const AboutSection = () => {
             onClick={toggleVideo}
           >
             <source src={companyVideo} type="video/mp4" />
-            Il tuo browser non supporta i video HTML5.
+            {t('videoNotSupported')}
           </video>
           
           {!videoLoaded && (
             <div style={styles.videoLoading}>
               <div style={styles.loadingSpinner}></div>
-              Caricamento video...
+              {t('loadingVideo')}
             </div>
           )}
           
@@ -576,14 +576,12 @@ const AboutSection = () => {
           </div>
         </div>
         <p style={styles.videoCaption}>
-          Scopri la storia e i valori di ORSI: tradizione italiana dal 1907
+          {t('videoCaption')}
         </p>
         
-        <p style={styles.description}>
-          Nata a Bologna nel <span style={styles.year}>1907</span>, <span style={styles.highlightText}>ORSI</span> è una delle poche realtà italiane di rilievo nel mercato della detergenza in polvere domestica ed istituzionale. Competiamo per esperienza, tecnologia e qualità con le aziende leader del settore. Oggi, <span style={styles.highlightText}>ORSI</span> investe in Ricerca e Sviluppo per innovare nel campo della detergenza e della cosmesi.
-        </p>
+        <p style={styles.description} dangerouslySetInnerHTML={{ __html: t('chiSiamo3') }} />
         
-        <h3 style={styles.subtitle}>Con l'impegno che</h3>
+        <h3 style={styles.subtitle}>{t('chiSiamo4')}</h3>
         
         <Row className="g-4">
           {valuesData.map((value) => (
